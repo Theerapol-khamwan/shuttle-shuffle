@@ -23,6 +23,7 @@ export default function Scoreboard() {
   const [scoreA, setScoreA] = useState(match?.team_a_score || 0);
   const [scoreB, setScoreB] = useState(match?.team_b_score || 0);
   const [servingTeam, setServingTeam] = useState<'A' | 'B'>('A');
+  const [showControls, setShowControls] = useState(false);
 
   const isLandscape = width > height;
   const winningScore = currentSession?.winning_score || 21;
@@ -160,17 +161,27 @@ export default function Scoreboard() {
         />
       </View>
 
-      <View style={styles.controls}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.controlText}>กลับ</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.finishButton} onPress={handleFinishMatch}>
-          <Text style={styles.finishText}>จบแมตช์</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.swapButton} onPress={() => setServingTeam(servingTeam === 'A' ? 'B' : 'A')}>
-          <Text style={styles.controlText}>สลับฝั่งเสิร์ฟ</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Floating Menu Button */}
+      <TouchableOpacity 
+        style={styles.menuToggleBtn} 
+        onPress={() => setShowControls(!showControls)}
+      >
+        <Text style={styles.menuToggleText}>{showControls ? 'ซ่อนเมนู' : '☰ เมนู'}</Text>
+      </TouchableOpacity>
+
+      {showControls && (
+        <View style={styles.controlsOverlay}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.controlText}>กลับ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.finishButton} onPress={handleFinishMatch}>
+            <Text style={styles.finishText}>จบแมตช์</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.swapButton} onPress={() => setServingTeam(servingTeam === 'A' ? 'B' : 'A')}>
+            <Text style={styles.controlText}>สลับฝั่งเสิร์ฟ</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -273,14 +284,39 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     fontSize: 14,
   },
-  controls: {
-    height: 70,
-    backgroundColor: '#222',
+  menuToggleBtn: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 20,
+    zIndex: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  menuToggleText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  controlsOverlay: {
+    position: 'absolute',
+    bottom: 20,
+    left: '10%',
+    width: '80%',
+    backgroundColor: 'rgba(34,34,34,0.95)',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#444',
+    paddingVertical: 15,
+    borderRadius: 15,
+    zIndex: 90,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
   },
   controlText: {
     color: '#aaa',
@@ -298,6 +334,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  backButton: { padding: 10 },
-  swapButton: { padding: 10 },
+  backButton: {
+    padding: 10,
+  },
+  swapButton: {
+    padding: 10,
+  },
 });

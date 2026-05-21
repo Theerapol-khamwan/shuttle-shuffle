@@ -21,7 +21,7 @@ export default function RootLayout() {
       <Stack.Screen name="index" options={{ title: 'ShuttleShuffle' }} />
       <Stack.Screen name="player-setup" options={{ title: 'จัดการผู้เล่น' }} />
       <Stack.Screen name="dashboard" options={{ title: 'แดชบอร์ด' }} />
-      <Stack.Screen name="scoreboard/[id]" options={{ title: 'กระดานคะแนน' }} />
+      <Stack.Screen name="scoreboard/[id]" options={{ title: 'กระดานคะแนน', headerShown: false }} />
       <Stack.Screen name="summary" options={{ title: 'สรุปผลประจำวัน' }} />
     </Stack>
   );
