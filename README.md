@@ -77,13 +77,13 @@
 1. Clone โปรเจกต์ลงเครื่อง
 2. รันคำสั่งติดตั้ง dependencies:
    ```bash
-   npm install
+   bun install
    ```
 
 ### การรันแอป (Usage)
 ใช้คำสั่งนี้เพื่อเปิดหน้า Development:
 ```bash
-npx expo start
+bunx expo start
 ```
 *   **สแกน QR Code** ผ่านแอป **Expo Go** บนมือถือเพื่อทดสอบบนเครื่องจริง (แนะนำ)
 *   กด `w` เพื่อดูผ่านเว็บเบราว์เซอร์
@@ -134,7 +134,17 @@ npx expo start
 *   **Round-Based Bulk Generation:** ระบบสุ่มล่วงหน้า (`bulkMatchGeneration`) สุ่มเป็นรอบ โดยใน 1 รอบจะกระจายแมตช์ไปยังทุกคอร์ตที่เปิดใช้งาน พร้อมกลไกป้องกันผู้เล่นคนเดิมลงเล่นหลายสนามในเวลาเดียวกัน (Overlap Prevention)
 *   **Unit Tests:** เขียน Unit Test ครอบคลุมกลไกสำคัญทั้งหมด รวมถึงการคำนวณราคาแบบหลายสนาม และการสุ่มแมตช์แยกคอร์ตใน `usePlayerStore`
 
+### ✅ Phase 8: UI Migration to Playful Neo-Brutalist Design (Atomic Design)
+*   **Design Tokens System:** สร้าง Design Token แบบเต็มรูปแบบ (colors, typography, spacing, shadows) ตามข้อกำหนดดีไซน์ Stitch
+*   **Atomic Design Architecture:** จัดโครงสร้าง component แยกตามสถาปัตยกรรมอะตอม (Atoms, Molecules, Organisms, Templates)
+*   **Typography Loading:** เพิ่มการโหลดฟอนต์ Google Fonts 4 ตัว (Bricolage Grotesque, Plus Jakarta Sans, Space Grotesk, Sarabun) ผ่าน expo-font พร้อมระบบจัดการ Splash Screen
+*   **Neo-Brutalist Visual Styles:** ปรับแต่งองค์ประกอบดีไซน์ให้ใช้ขอบหนา 3px, เงาทึบไม่มีเบลอ 4px/8px, พื้นหลัง Dot Grid, และโทนสีหลักเป็น Electric Yellow (#d6ff00)
+*   **Complete Screen Refresh:** อัปเดตและทำความสะอาด UI หน้าหลักทั้งหมด (หน้าแรก, จัดการผู้เล่น, แดชบอร์ดคอร์ต, กระดานคะแนนเสมือนจริง, สรุปผลลัพธ์ประจำวัน) ให้สวยงามมีชีวิตชีวาด้วย micro-animations แบบ spring
+*   **Edge-to-Edge Gestural Scoreboard:** พัฒนากระดานคะแนน Match Live แบบ Colossal (ตัวเลขขนาดใหญ่พิเศษ 150/180px) ไร้ส่วนขยับเขยื้อนด้วย monospaced tabular numerals และตัด AppBar ออกเพื่อเพิ่มพื้นที่การแสดงผลสูงสุด พร้อมอัปเกรดระบบสัมผัสขยายคลุมทั่วแผ่นการ์ดคะแนนแบ่งสัดส่วน 50/50 (กดฝั่งซ้ายของกรอบเพื่อลดแต้ม -1, กดฝั่งขวาของกรอบเพื่อเพิ่มแต้ม +1 ได้อย่างลื่นไหลแม้อยู่ข้างสนาม)
+*   **Faded Floating Menu:** จัดตำแหน่งปุ่มเปิดเมนูลอยแบบแฮมเบอร์เกอร์ไว้มุมขวาบน ปรับความจางลงเมื่อไม่ได้ใช้งาน (opacity 0.4) พร้อมหน้าต่างควบคุมลอยแบบดร็อปดาวน์ที่เข้ากับธีมแอปพลิเคชัน
+
 ---
+
 
 ## ⚖️ Engineering Standards (มาตรฐานการพัฒนา)
 1.  **The Rule of Fairness:** ห้ามสุ่มแบบ 100% ต้องใช้ Priority Weighting เพื่อความยุติธรรมสูงสุด

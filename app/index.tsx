@@ -1,7 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { colors } from '../src/ui/tokens/colors';
+import { spacing } from '../src/ui/tokens/spacing';
+import { NeoText, NeoButton, DoodleStar } from '../src/ui/atoms';
+import { ScreenTemplate } from '../src/ui/templates';
 
 export default function Home() {
   const router = useRouter();
@@ -11,51 +14,103 @@ export default function Home() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🏸 ShuttleShuffle</Text>
-      <Text style={styles.subtitle}>ระบบจัดการก๊วนแบดมินตันอัจฉริยะ</Text>
-      
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleStartSession}
-      >
-        <Text style={styles.buttonText}>เริ่มรอบใหม่ (New Session)</Text>
-      </TouchableOpacity>
+    <ScreenTemplate style={styles.container}>
+      {/* Decorative Star elements */}
+      <DoodleStar size={24} rotation={15} style={styles.starTopLeft} />
+      <DoodleStar size={30} rotation={45} style={styles.starTopRight} />
 
-      <StatusBar style="auto" />
-    </View>
+      {/* Kawaii Logo */}
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../stitch_shuttleshuffle_badminton_manager/shuttleshuffle_doodle_logo/screen.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
+      {/* Title & Subtitle */}
+      <View style={styles.titleContainer}>
+        <NeoText variant="display" style={styles.title}>
+          SHUTTLE
+          {"\n"}
+          SHUFFLE
+        </NeoText>
+        <NeoText variant="body" color={colors.outline} style={styles.subtitle}>
+          ระบบจัดการก๊วนแบดมินตันอัจฉริยะ
+        </NeoText>
+      </View>
+
+      {/* Start Button */}
+      <View style={styles.buttonContainer}>
+        <NeoButton
+          variant="primary"
+          title="เริ่มรอบใหม่ (NEW SESSION)"
+          onPress={handleStartSession}
+          fullWidth
+        />
+      </View>
+    </ScreenTemplate>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing.xxl,
     flex: 1,
-    backgroundColor: '#fff',
+  },
+  logoContainer: {
+    height: 180,
+    width: 180,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    marginBottom: spacing.xl,
+    borderWidth: spacing.strokeThick,
+    borderColor: colors.onBackground,
+    borderRadius: 90, // Circular border frame for the mascot
+    backgroundColor: '#ffffff',
+    overflow: 'hidden',
+    // 4px solid shadow
+    shadowColor: colors.onBackground,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  logo: {
+    width: 140,
+    height: 140,
+  },
+  titleContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.xxl,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#1a1a1a',
+    textAlign: 'center',
+    fontSize: 42,
+    lineHeight: 46,
+    fontWeight: '900',
+    color: colors.onBackground,
   },
   subtitle: {
+    marginTop: spacing.sm,
     fontSize: 16,
-    color: '#666',
-    marginBottom: 40,
+    textAlign: 'center',
   },
-  button: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 10,
-    elevation: 3,
+  buttonContainer: {
+    width: '100%',
+    paddingHorizontal: spacing.md,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+  starTopLeft: {
+    position: 'absolute',
+    left: spacing.marginMobile,
+    top: spacing.xl,
+  },
+  starTopRight: {
+    position: 'absolute',
+    right: spacing.marginMobile,
+    top: spacing.md,
   },
 });
+

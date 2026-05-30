@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ShuttleShuffle - Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "on-tertiary": "#ffffff",
+                            "surface-tint": "#546500",
+                            "on-surface-variant": "#454932",
+                            "error-container": "#ffdad6",
+                            "background": "#fcf9f8",
+                            "primary-fixed": "#cbf200",
+                            "on-secondary": "#ffffff",
+                            "on-background": "#1c1b1b",
+                            "on-secondary-container": "#285f80",
+                            "on-secondary-fixed-variant": "#0c4b6c",
+                            "secondary": "#2e6385",
+                            "on-primary-fixed-variant": "#3f4c00",
+                            "inverse-primary": "#b2d400",
+                            "on-tertiary-fixed-variant": "#663a43",
+                            "secondary-container": "#a5d8ff",
+                            "error": "#ba1a1a",
+                            "surface-dim": "#dcd9d9",
+                            "on-tertiary-container": "#905e67",
+                            "surface-container-low": "#f6f3f2",
+                            "outline-variant": "#c5c9ac",
+                            "tertiary-fixed": "#ffd9df",
+                            "on-primary-container": "#607400",
+                            "on-surface": "#1c1b1b",
+                            "on-secondary-fixed": "#001e2f",
+                            "on-primary-fixed": "#181e00",
+                            "outline": "#757960",
+                            "on-tertiary-fixed": "#330f19",
+                            "surface-container-high": "#ebe7e7",
+                            "secondary-fixed": "#c9e6ff",
+                            "surface-container-lowest": "#ffffff",
+                            "surface-variant": "#e5e2e1",
+                            "surface-container-highest": "#e5e2e1",
+                            "secondary-fixed-dim": "#9accf3",
+                            "inverse-surface": "#313030",
+                            "surface-container": "#f0edec",
+                            "surface": "#fcf9f8",
+                            "on-primary": "#ffffff",
+                            "on-error": "#ffffff",
+                            "surface-bright": "#fcf9f8",
+                            "tertiary": "#81515a",
+                            "on-error-container": "#93000a",
+                            "primary-fixed-dim": "#b2d400",
+                            "tertiary-fixed-dim": "#f4b6c1",
+                            "primary-container": "#d6ff00",
+                            "primary": "#546500",
+                            "inverse-on-surface": "#f3f0ef",
+                            "tertiary-container": "#ffe9eb"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "base": "8px",
+                            "gutter": "16px",
+                            "stroke-weight-thin": "1.5px",
+                            "margin-desktop": "40px",
+                            "stroke-weight-thick": "3px",
+                            "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                            "display-lg": [
+                                    "Bricolage Grotesque"
+                            ],
+                            "headline-lg": [
+                                    "Bricolage Grotesque"
+                            ],
+                            "headline-lg-mobile": [
+                                    "Bricolage Grotesque"
+                            ],
+                            "body-md": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "label-sm": [
+                                    "Space Grotesk"
+                            ]
+                    },
+                    "fontSize": {
+                            "display-lg": [
+                                    "48px",
+                                    {
+                                            "lineHeight": "52px",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "800"
+                                    }
+                            ],
+                            "headline-lg": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "40px",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "headline-lg-mobile": [
+                                    "28px",
+                                    {
+                                            "lineHeight": "34px",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "body-md": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "label-sm": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "fontWeight": "700"
+                                    }
+                            ]
+                    }
+            },
+                },
+        }
+    </script>
+<style>
+        .neo-brutalism-border {
+            border: theme('spacing.stroke-weight-thick') solid theme('colors.on-background');
+        }
+        .neo-brutalism-shadow-sm {
+            box-shadow: 4px 4px 0px 0px theme('colors.on-background');
+        }
+        .neo-brutalism-shadow-md {
+            box-shadow: 8px 8px 0px 0px theme('colors.on-background');
+        }
+        .neo-brutalism-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+        .doodle-bg {
+            background-image: radial-gradient(theme('colors.outline-variant') 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .hatched-bg {
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                theme('colors.on-background') 10px,
+                theme('colors.on-background') 12px
+            );
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col doodle-bg pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 bg-background dark:bg-background text-primary dark:text-primary-fixed font-headline-lg-mobile text-headline-lg-mobile uppercase docked full-width top-0 border-b-stroke-weight-thick border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-40 sticky">
+<button class="material-symbols-outlined text-3xl hover:bg-primary-container transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none p-2 rounded-lg">menu</button>
+<h1 class="font-display-lg text-headline-lg-mobile tracking-tighter text-on-background dark:text-on-background">SHUTTLE SHUFFLE</h1>
+<div class="w-10 h-10 rounded-full border-stroke-weight-thick border-on-background overflow-hidden bg-primary-container hover:bg-primary-container transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center">
+<span class="material-symbols-outlined text-on-background">face</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col w-full max-w-7xl mx-auto p-margin-mobile md:p-margin-desktop gap-8 relative overflow-hidden">
+<!-- Decorative Doodles Background Elements (Absolute) -->
+<div class="absolute top-10 left-10 opacity-30 pointer-events-none hidden md:block">
+<svg fill="none" height="60" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" viewbox="0 0 100 100" width="60">
+<path d="M50 10 L50 90 M10 50 L90 50 M25 25 L75 75 M25 75 L75 25"></path>
+</svg>
+</div>
+<div class="absolute bottom-20 right-10 opacity-30 pointer-events-none hidden md:block">
+<svg fill="none" height="80" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" viewbox="0 0 100 100" width="80">
+<path d="M10 50 Q 30 10, 50 50 T 90 50"></path>
+<path d="M20 70 Q 40 30, 60 70 T 100 70"></path>
+</svg>
+</div>
+<!-- Dashboard Header area -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4 z-10">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-on-background relative inline-block">
+                    Live Courts
+                    <span class="absolute -bottom-1 left-0 w-full h-3 bg-secondary-container -z-10 transform -rotate-1"></span>
+</h2>
+<p class="font-body-md text-on-surface-variant mt-2">Manage ongoing matches and assignments.</p>
+</div>
+<button class="bg-primary-container text-on-primary-container border-stroke-weight-thick border-on-background font-label-sm px-6 py-3 rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-primary transition-colors hover:text-on-primary active:translate-x-[4px] active:translate-y-[4px] active:shadow-none flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+                NEW MATCH (สร้างแมตช์)
+            </button>
+</div>
+<!-- Courts Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 z-10">
+<!-- Court 1: Active Match -->
+<div class="bg-surface border-stroke-weight-thick border-on-background rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-4 transform rotate-1 hover:rotate-0 transition-transform relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-error-container rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+<div class="flex justify-between items-center border-b-stroke-weight-thin border-outline-variant pb-2">
+<h3 class="font-label-sm text-lg font-bold text-on-background uppercase bg-error-container px-2 py-1 rounded-md border-stroke-weight-thin border-on-background transform -rotate-2">Court 1</h3>
+<span class="bg-error text-on-error font-label-sm px-2 py-1 rounded-full border-stroke-weight-thin border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 animate-pulse">
+<span class="w-2 h-2 rounded-full bg-on-error block"></span> ACTIVE
+                    </span>
+</div>
+<div class="flex-grow flex flex-col justify-center items-center py-4 relative">
+<div class="flex items-center gap-4 w-full">
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-secondary-container border-stroke-weight-thick border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden">
+<img alt="A playful, neo-brutalist style doodle avatar of a person with spiky hair and round glasses, thick black outlines, pastel blue fill, solid black shadow on an off-white background." class="w-full h-full object-cover" data-alt="A playful, neo-brutalist style doodle avatar of a person with spiky hair and round glasses, thick black outlines, pastel blue fill, solid black shadow on an off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwCnoCIGCe-aNXl661v6nA6tpgogs8OO1o54faBz9VMjf5ns1MCo84t_G1PAcZiW5PjE5tSZcCxpB91T4CJjReHM5LmYkH4lxp85RanTONLcu25sRSWvHkyyREg1k022UaLLz1-6c4JXZ3Ic3-1_jPDFDcYDCgZAkzQl30BNYc6zdlFvtpzAUsf6rtOO66yHhNh7uDzkRZcPPiGmPlo1i5HOqoYkzoYjgJ8ZZI-SBYy-4W3oQVwRvNLARvWeokq8PGHrLsptCZkLrF"/>
+</div>
+<span class="font-label-sm text-center truncate w-full">J. Doe</span>
+<span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full border border-on-background">Pro</span>
+</div>
+<div class="font-display-lg text-tertiary transform -rotate-12 select-none">VS</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-tertiary-container border-stroke-weight-thick border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden">
+<img alt="A playful, neo-brutalist style doodle avatar of a person with short hair and a determined expression, thick black outlines, pastel pink fill, solid black shadow on an off-white background." class="w-full h-full object-cover" data-alt="A playful, neo-brutalist style doodle avatar of a person with short hair and a determined expression, thick black outlines, pastel pink fill, solid black shadow on an off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwMGVRNFfZkKr44dOYeCii2Dp8IAOQjrIEM7bhvT1b1gCj347B7HCd2S2czSA5wcwCq4L-_0Tz6FVALPE2gV6-6Y0bmgtgeZs4TQ85BhPOxIQrUsoX7McYFiCAxDKAiCgZTsvqsCpV2X2liNS0UxpeoWZJEowDJMkPfrbG54dhWH2Z4SrknxMTluoYcVvIIt3RzVI07Lc3EeRBRDRDZ2WhAgo-TT3_zckOm9Z48yibTG3yPsAmGhc2M6-1Z5YsKK2yj8zj0ZtIRGCh"/>
+</div>
+<span class="font-label-sm text-center truncate w-full">M. Chen</span>
+<span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full border border-on-background">Int</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 border-t-stroke-weight-thin border-outline-variant pt-3">
+<div class="flex justify-between items-center font-label-sm text-on-surface-variant text-xs">
+<span>Score</span>
+<span class="font-bold text-on-background">18 - 14</span>
+</div>
+<div class="flex justify-between items-center font-label-sm text-on-surface-variant text-xs">
+<span>Duration</span>
+<span class="text-on-background">12m 45s</span>
+</div>
+</div>
+</div>
+<!-- Court 2: Active Match -->
+<div class="bg-surface border-stroke-weight-thick border-on-background rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-4 transform -rotate-1 hover:rotate-0 transition-transform relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-error-container rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+<div class="flex justify-between items-center border-b-stroke-weight-thin border-outline-variant pb-2">
+<h3 class="font-label-sm text-lg font-bold text-on-background uppercase bg-error-container px-2 py-1 rounded-md border-stroke-weight-thin border-on-background transform rotate-1">Court 2</h3>
+<span class="bg-error text-on-error font-label-sm px-2 py-1 rounded-full border-stroke-weight-thin border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1 animate-pulse">
+<span class="w-2 h-2 rounded-full bg-on-error block"></span> ACTIVE
+                    </span>
+</div>
+<div class="flex-grow flex flex-col justify-center items-center py-4 relative">
+<div class="flex items-center gap-4 w-full">
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-primary-container border-stroke-weight-thick border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden">
+<img alt="A playful, neo-brutalist style doodle avatar of a person with curly hair, thick black outlines, bright yellow fill, solid black shadow on an off-white background." class="w-full h-full object-cover" data-alt="A playful, neo-brutalist style doodle avatar of a person with curly hair, thick black outlines, bright yellow fill, solid black shadow on an off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4BKhlF1YnpCaM7aoSyDMHMLLz-X15yn1JrzvgEIkkdJ6JZ49DWHV5FowZQV3WYxY4HnhyYActJ93XFO1x8hmOcTSlB74b0eUy_ErVqXDInhiLDQwKewj4fiHatcGLbs9UBoa3ENhhgEtomkmpehI_OMKM4MPcLxBcQ2P2EqIhPbAboPqgRtOz_90TgxDOjs_-mwMy4tJ_OBludsxXxo-zmrjvS5DHFXB7PkiIWXMmnDOhkMJW3ztIlwvzniZDRp87i-tZ7ckjLkg2"/>
+</div>
+<span class="font-label-sm text-center truncate w-full">A. Smith</span>
+<span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full border border-on-background">Pro</span>
+</div>
+<div class="font-display-lg text-tertiary transform rotate-6 select-none">VS</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-secondary-container border-stroke-weight-thick border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden">
+<img alt="A playful, neo-brutalist style doodle avatar of a person wearing a cap, thick black outlines, pastel blue fill, solid black shadow on an off-white background." class="w-full h-full object-cover" data-alt="A playful, neo-brutalist style doodle avatar of a person wearing a cap, thick black outlines, pastel blue fill, solid black shadow on an off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAscLQhBg1TR4eH5hzJY2sSd6ufQonKuqxbh-4uYrEETDhjDvgsB5tVW4lG2kKKkZK4wZiZlE2-SA8e40SHgbkwMys1Z9G5JI0qqec3-HM2xLf-QYRul-e4ctQ5iugSoLBkNgrZ18hIc6Wl1k0peoItPCy2YJyvHcuPhxVKkk_9ZUgtxaIpSNzk9GunpscxvPlmFWLL4Q0o7YUX5vjkiXbM41kkiZl1uAwYhfICu5eKHYfng3DbQPQbMKRxnYPJtJy2bFVTV7sX7yGL"/>
+</div>
+<span class="font-label-sm text-center truncate w-full">T. Lee</span>
+<span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full border border-on-background">Pro</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 border-t-stroke-weight-thin border-outline-variant pt-3">
+<div class="flex justify-between items-center font-label-sm text-on-surface-variant text-xs">
+<span>Score</span>
+<span class="font-bold text-on-background">21 - 20</span>
+</div>
+<div class="flex justify-between items-center font-label-sm text-on-surface-variant text-xs">
+<span>Duration</span>
+<span class="text-on-background">28m 10s</span>
+</div>
+</div>
+</div>
+<!-- Court 3: Vacant -->
+<div class="bg-surface border-stroke-weight-thick border-on-background border-dashed rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-4 transform rotate-2 hover:rotate-0 transition-transform opacity-90 relative">
+<div class="flex justify-between items-center border-b-stroke-weight-thin border-outline-variant pb-2">
+<h3 class="font-label-sm text-lg font-bold text-on-background uppercase bg-surface-container-high px-2 py-1 rounded-md border-stroke-weight-thin border-on-background transform -rotate-1">Court 3</h3>
+<span class="bg-surface-container-high text-on-surface-variant font-label-sm px-2 py-1 rounded-full border-stroke-weight-thin border-on-background flex items-center gap-1">
+                        Vacant (ว่าง)
+                    </span>
+</div>
+<div class="flex-grow flex flex-col justify-center items-center py-6 gap-4">
+<span class="material-symbols-outlined text-5xl text-outline opacity-50" style="font-variation-settings: 'FILL' 0;">sports_tennis</span>
+<button class="w-full bg-primary-container text-on-primary-container border-stroke-weight-thick border-on-background font-label-sm px-4 py-3 rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-primary hover:text-on-primary transition-colors active:translate-x-[4px] active:translate-y-[4px] active:shadow-none flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">shuffle</span>
+                        RANDOMIZE (สุ่มผู้เล่น)
+                    </button>
+</div>
+</div>
+<!-- Court 4: Vacant -->
+<div class="bg-surface border-stroke-weight-thick border-on-background border-dashed rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-4 transform -rotate-2 hover:rotate-0 transition-transform opacity-90 relative">
+<div class="flex justify-between items-center border-b-stroke-weight-thin border-outline-variant pb-2">
+<h3 class="font-label-sm text-lg font-bold text-on-background uppercase bg-surface-container-high px-2 py-1 rounded-md border-stroke-weight-thin border-on-background transform rotate-2">Court 4</h3>
+<span class="bg-surface-container-high text-on-surface-variant font-label-sm px-2 py-1 rounded-full border-stroke-weight-thin border-on-background flex items-center gap-1">
+                        Vacant (ว่าง)
+                    </span>
+</div>
+<div class="flex-grow flex flex-col justify-center items-center py-6 gap-4">
+<span class="material-symbols-outlined text-5xl text-outline opacity-50" style="font-variation-settings: 'FILL' 0;">sports_tennis</span>
+<button class="w-full bg-primary-container text-on-primary-container border-stroke-weight-thick border-on-background font-label-sm px-4 py-3 rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-primary hover:text-on-primary transition-colors active:translate-x-[4px] active:translate-y-[4px] active:shadow-none flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">shuffle</span>
+                        RANDOMIZE (สุ่มผู้เล่น)
+                    </button>
+</div>
+</div>
+</div>
+<!-- Waiting List Section -->
+<div class="mt-8 z-10 bg-surface border-stroke-weight-thick border-on-background rounded-xl p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+<!-- Decorative sticker -->
+<div class="absolute -top-4 -right-4 w-16 h-16 bg-primary-container rounded-full border-stroke-weight-thick border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center transform rotate-12 z-20">
+<span class="material-symbols-outlined text-on-primary-container text-2xl">hourglass_empty</span>
+</div>
+<div class="flex items-center gap-3 mb-6 border-b-stroke-weight-thick border-on-background pb-4">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">groups</span>
+<h2 class="font-headline-lg-mobile text-on-background">Waiting List (รายการรอคิว)</h2>
+<span class="ml-auto bg-tertiary-container text-on-tertiary-container font-label-sm px-3 py-1 rounded-full border-stroke-weight-thick border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transform rotate-2">
+                    5 Players
+                </span>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Player 1 -->
+<div class="flex items-center justify-between p-3 border-stroke-weight-thick border-on-background rounded-lg bg-surface-container-lowest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="font-display-lg text-xl text-outline w-6 text-center">#1</div>
+<div class="w-10 h-10 rounded-full bg-secondary-container border-stroke-weight-thin border-on-background overflow-hidden">
+<img alt="A small doodle avatar, neo-brutalist style, thick outline, pastel fill." class="w-full h-full object-cover" data-alt="A small playful doodle avatar in neo-brutalist style, featuring thick black outlines, a pastel color fill, and a solid black shadow on an off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBacNaBXlpsnBpHfmj3rvC05VE5QaF4B0qQMlwXyY1UR3SXLjRt83xyuTlGgCBAivZfalEIKToNMynW8_3bIE96HRxcU76AMPPQecepdF4jiC70k8aOFFqOiO1zHaKaDo113qF8LAziNnq76ipaZc9us2k1gFvVvdxFxa3nUo00rwVZmbiunE9IBtMihXEcdXlYZDn-QgaWoxytpo5vhNOuLV5Ui934Imd6kvOnX1RsKu7AW5lLChsayFgqe4mdhfsAYx5XbkfiFuDw"/>
+</div>
+<div>
+<p class="font-label-sm font-bold text-on-background text-base">Sarah K.</p>
+<p class="text-xs text-on-surface-variant font-body-md">Intermediate • Waiting 15m</p>
+</div>
+</div>
+<button class="bg-transparent border-2 border-dashed border-on-background text-on-background p-2 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+</div>
+<!-- Player 2 -->
+<div class="flex items-center justify-between p-3 border-stroke-weight-thick border-on-background rounded-lg bg-surface-container-lowest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform cursor-pointer transform -rotate-1">
+<div class="flex items-center gap-4">
+<div class="font-display-lg text-xl text-outline w-6 text-center">#2</div>
+<div class="w-10 h-10 rounded-full bg-tertiary-container border-stroke-weight-thin border-on-background overflow-hidden">
+<img alt="A small doodle avatar, neo-brutalist style, thick outline, pastel fill." class="w-full h-full object-cover" data-alt="A small playful doodle avatar in neo-brutalist style, featuring thick black outlines, a pastel pink fill, and a solid black shadow on an off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABq6nGQPG-RqBy2-T8o9Vn0-v-Zlb-Si04cUMdvHtUlu7e-aa_LRFNPaAw3ix3J7scCbbAhBlggE5cC0OVYDzJS5HhGEqHwkg14kHg-xPognGsz1Ywel0OvpqCV2ElDVlnT4wV_ts2TOimz_NE9WBkELzHsj_UJKjABf31Ai88q557jHv9VyEMbH0S8WpiJ4Zoe4TF6BM4ONVVYq8GG0PMFdlHKHYyq5_MNBX5DVZQMkgclCCcdjnD_nWjEyg6vAEPKiDUI9DfYSaP"/>
+</div>
+<div>
+<p class="font-label-sm font-bold text-on-background text-base">Mike R.</p>
+<p class="text-xs text-on-surface-variant font-body-md">Beginner • Waiting 10m</p>
+</div>
+</div>
+<button class="bg-transparent border-2 border-dashed border-on-background text-on-background p-2 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+</div>
+<!-- View All Link -->
+<div class="text-center mt-2">
+<a class="font-label-sm text-primary hover:underline underline-offset-4 decoration-stroke-weight-thin uppercase tracking-wider" href="#">View All Players</a>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-background dark:bg-background text-primary dark:text-primary-fixed font-label-sm text-label-sm uppercase border-t-stroke-weight-thick border-on-background md:hidden">
+<!-- Active Tab: COURTS -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl border-stroke-weight-thin border-on-background px-4 py-1 translate-y-[-4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-2xl mb-1" style="font-variation-settings: 'FILL' 1;">sports_tennis</span>
+            COURTS
+        </a>
+<!-- Inactive Tab: MATCHES -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-colors active:scale-95 px-4 py-1" href="#">
+<span class="material-symbols-outlined text-2xl mb-1">groups</span>
+            MATCHES
+        </a>
+<!-- Inactive Tab: LEADER -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-colors active:scale-95 px-4 py-1" href="#">
+<span class="material-symbols-outlined text-2xl mb-1">leaderboard</span>
+            LEADER
+        </a>
+<!-- Inactive Tab: PROFILE -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary transition-colors active:scale-95 px-4 py-1" href="#">
+<span class="material-symbols-outlined text-2xl mb-1">person</span>
+            PROFILE
+        </a>
+</nav>
+</body></html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShuttleShuffle README</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #24292e;
+      background-color: #fff;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    h1, h2, h3 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+    code { background-color: rgba(27,31,35,0.05); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; }
+    pre { background-color: #f6f8fa; padding: 16px; border-radius: 3px; overflow: auto; }
+    hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #e1e4e8; border: 0; }
+  </style>
+</head>
+<body>
+<h1>🏸 ShuttleShuffle</h1>
+<p><strong>ShuttleShuffle</strong> คือแอปพลิเคชันจัดการก๊วนแบดมินตันแบบ <strong>Offline-First</strong> ที่สมบูรณ์แบบ ออกแบบมาเพื่อแก้ปัญหาการจัดคิวเล่นที่ไม่เป็นธรรม การจับคู่ซ้ำซาก และความสับสนเรื่องการนับคะแนน โดยตัวแอปทำหน้าที่เป็นทั้ง &quot;ผู้จัดการคิว&quot; และ &quot;กรรมการบนคอร์ต&quot; จบครบในมือถือเครื่องเดียวโดยไม่ต้องใช้อินเทอร์เน็ต</p>
+<hr>
+<h2>🌟 Core Features (ฟีเจอร์เด่น)</h2>
+<h3>1. Smart Fair Matchmaking (ระบบสุ่มคิวอัจฉริยะ)</h3>
+<ul>
+<li><strong>The Rule of Fairness (Enhanced):</strong> ระบบจะให้สิทธิ์ผู้เล่นที่มีจำนวนเกมสะสมน้อยที่สุดได้ลงสนามก่อนเสมอ</li>
+<li><strong>Queue Simulation:</strong> เมื่อกด &quot;สุ่มล่วงหน้า&quot; ระบบจะจำลองคิวเพื่อให้ทุกคนได้เล่นในจำนวนรอบที่เท่ากันที่สุด</li>
+<li><strong>Singles &amp; Doubles Support:</strong> เลือกสุ่มได้ทั้งประเภทเดี่ยว (2 คน) และคู่ (4 คน) โดยระบบจะคำนวณคิวให้อัตโนมัติ</li>
+<li><strong>Consecutive Rest Logic:</strong> ระบบจะป้องกันไม่ให้คนเดิมลงสนามติดกันหลายรอบ (ถ้ามีคนรออยู่) เพื่อให้ทุกคนได้พักเหนื่อยอย่างยุติธรรม</li>
+<li><strong>Partner/Opponent Variation:</strong> อัลกอริทึมพยายามจับคู่พาร์ทเนอร์และคู่แข่งให้หลากหลายที่สุด ไม่ให้เจอคนเดิมซ้ำๆ</li>
+</ul>
+<h3>2. Smart Scoreboard &amp; Responsive UI (กระดานคะแนนอัจฉริยะ)</h3>
+<ul>
+<li><strong>Multi-Orientation Support:</strong> รองรับทั้งแนวตั้ง (Portrait) และแนวนอน (Landscape - แนะนำสำหรับการวางข้างสนาม)</li>
+<li><strong>High-Visibility Score:</strong> ตัวเลขคะแนนขนาดใหญ่พิเศษ เห็นชัดแม้ยืนอยู่ไกล</li>
+<li><strong>Service Indicator:</strong> บอกฝั่งเสิร์ฟ (ซ้าย/ขวา) อัตโนมัติตามกติกาสากล (คู่-ขวา / คี่-ซ้าย)</li>
+<li><strong>Deuce &amp; Game Point:</strong> มีระบบแจ้งเตือน Game Point และระบบ Deuce (ดิวส์) ที่รองรับการชนะห่าง 2 แต้ม พร้อมเพดานคะแนนสูงสุด</li>
+</ul>
+<h3>3. Session Management (การจัดการรอบการเล่น)</h3>
+<ul>
+<li><strong>Player Setup:</strong> เพิ่ม/ลบ รายชื่อเพื่อนในก๊วนได้รวดเร็ว พร้อมปุ่มล้างข้อมูลทั้งหมด (Clear All)</li>
+<li><strong>Waiting List:</strong> แสดงรายชื่อผู้เล่นที่กำลังรอคิว (เศษ) พร้อมบอกลำดับคิวที่จะได้ลงสนามถัดไป</li>
+<li><strong>Match Settings:</strong> ปรับเปลี่ยนแต้มที่ชนะ (Winning Score) และเปิด/ปิดระบบ Deuce ได้แบบ Dynamic</li>
+<li><strong>Session Summary:</strong> สรุปสถิติหลังจบวัน (ใครเล่นกี่เกม ชนะเท่าไหร่ แพ้เท่าไหร่)</li>
+<li><strong>Cost Calculator (ระบบคำนวณและหารค่าใช้จ่าย):</strong> คำนวณค่าคอร์ทและค่าลูกแบดมินตันตามจำนวนชั่วโมงและจำนวนลูกที่ใช้จริง พร้อมระบบหารเฉลี่ยเท่ากัน (Equal) หรือหารตามสัดส่วนจำนวนเกมที่ลงเล่น (Pro-rata)</li>
+</ul>
+<h3>4. Technical Excellence (ความเสถียรของระบบ)</h3>
+<ul>
+<li><strong>100% Offline-First:</strong> ข้อมูลทุกอย่างเก็บใน Local Database (SQLite) บนเครื่อง ไม่ต้องใช้เน็ต และไม่มีค่าใช้จ่ายเซิร์ฟเวอร์</li>
+<li><strong>Auto-Save Resilience:</strong> ทุกครั้งที่แต้มเปลี่ยน หรือมีการสร้างแมตช์ ระบบจะเซฟลงฐานข้อมูลทันที หากแอปปิดไปแล้วเปิดใหม่ ข้อมูลจะยังอยู่ครบถ้วน</li>
+</ul>
+<hr>
+<h2>🧪 Testing Strategy (แผนการทดสอบ)</h2>
+<p>เพื่อให้แอปทำงานได้อย่างถูกต้องและป้องกันบัคเมื่อมีการแก้ไขโค้ด จะมีการใช้ Unit Test สำหรับตรวจสอบส่วนสำคัญดังนี้:</p>
+<h3>1. Matchmaking Logic (<code>src/logic/matchmaking.ts</code>) ✅</h3>
+<ul>
+<li><strong>Rule of Fairness:</strong> ตรวจสอบว่าระบบเลือกคนที่เล่นเกมน้อยที่สุดลงสนามก่อน 100% ✅</li>
+<li><strong>Consecutive Rest:</strong> ตรวจสอบว่าคนที่เพิ่งเล่นจบไปต้องถูกพัก (Priority ต่ำลง) หากมีคนอื่นรออยู่ในคิว ✅</li>
+<li><strong>Singles/Doubles Mode:</strong> ตรวจสอบความถูกต้องของการสุ่มผู้เล่นตามจำนวนที่โหมดกำหนด ✅</li>
+<li><strong>No Repeats:</strong> ตรวจสอบว่าระบบพยายามเลือกพาร์ทเนอร์ที่เจอกันน้อยที่สุด ✅</li>
+</ul>
+<h3>2. Scoreboard &amp; Game Rules (<code>src/logic/scoreboard.ts</code>) ✅</h3>
+<ul>
+<li><strong>Standard Win:</strong> ตรวจสอบว่าผู้เล่นที่ถึงคะแนนเป้าหมายเป็นฝ่ายชนะ (เมื่อปิดระบบ Deuce) ✅</li>
+<li><strong>Deuce Logic:</strong> ตรวจสอบว่าต้องชนะห่าง 2 แต้มเมื่อคะแนนเสมอกันที่จุด Deuce ✅</li>
+<li><strong>Score Ceiling:</strong> ตรวจสอบว่าคะแนนจะไม่เกินเพดานสูงสุด (เช่น 30 แต้ม) ✅</li>
+<li><strong>Service Side:</strong> ตรวจสอบความถูกต้องของฝั่งเสิร์ฟ (ซ้าย/ขวา) อิงตามคะแนนปัจจุบัน ✅</li>
+</ul>
+<h3>3. State Management (<code>src/store/usePlayerStore.ts</code>) ✅</h3>
+<ul>
+<li><strong>Data Integrity:</strong> ตรวจสอบว่าเมื่อลบผู้เล่น แมตช์ที่เกี่ยวข้องจะถูกลบออกด้วยเพื่อป้องกันบัค Unknown ✅</li>
+<li><strong>Settings Persistence:</strong> ตรวจสอบว่าการแก้ไข Settings (Winning Score/Deuce) ถูกบันทึกลง State อย่างถูกต้อง ✅</li>
+</ul>
+<h3>4. Cost Calculation Logic (<code>src/logic/costCalculator.ts</code>) ✅</h3>
+<ul>
+<li><strong>Split Fairness:</strong> ตรวจสอบความถูกต้องของการหารค่าใช้จ่าย ทั้งแบบหารเท่ากันทุกคน และแบบคำนวณตามสัดส่วนเกมที่เล่น (Pro-rata) ✅</li>
+<li><strong>Decimal Rounding:</strong> ตรวจสอบความถูกต้องในการปัดเศษสตางค์ ไม่ให้มีเศษเงินเหลือหรือขาดหายไปจากระบบ ✅</li>
+<li><strong>Data Validation:</strong> ตรวจสอบค่าป้อนเข้า (จำนวนชั่วโมง, ราคาคอร์ท, จำนวนลูก, ราคายูนิต) ให้คำนวณถูกต้องและไม่เกิด Division by Zero ✅</li>
+</ul>
+<hr>
+<h2>🏗 System Architecture (สถาปัตยกรรมระบบ)</h2>
+<p>โปรเจกต์นี้ใช้เทคโนโลยีที่ทันสมัยและมีประสิทธิภาพสูง:</p>
+<ul>
+<li><strong>Frontend Framework:</strong> React Native (Expo SDK 54) + TypeScript</li>
+<li><strong>Local Database:</strong> <code>expo-sqlite</code> (Relational storage)</li>
+<li><strong>State Management:</strong> <code>Zustand</code> (Real-time UI updates)</li>
+<li><strong>Navigation:</strong> <code>expo-router</code> (File-based routing)</li>
+</ul>
+<hr>
+<h2>🚀 Getting Started (วิธีเริ่มต้นใช้งาน)</h2>
+<h3>การติดตั้ง (Installation)</h3>
+<ol>
+<li>Clone โปรเจกต์ลงเครื่อง</li>
+<li>รันคำสั่งติดตั้ง dependencies:<pre><code class="language-bash">npm install
+</code></pre>
+</li>
+</ol>
+<h3>การรันแอป (Usage)</h3>
+<p>ใช้คำสั่งนี้เพื่อเปิดหน้า Development:</p>
+<pre><code class="language-bash">npx expo start
+</code></pre>
+<ul>
+<li><strong>สแกน QR Code</strong> ผ่านแอป <strong>Expo Go</strong> บนมือถือเพื่อทดสอบบนเครื่องจริง (แนะนำ)</li>
+<li>กด <code>w</code> เพื่อดูผ่านเว็บเบราว์เซอร์</li>
+</ul>
+<hr>
+<h2>📜 Development Roadmap (ประวัติการพัฒนา)</h2>
+<h3>✅ Phase 1: Setup &amp; Data Layer</h3>
+<ul>
+<li>กำหนดโครงสร้างโปรเจกต์ (React Native + Expo + TypeScript)</li>
+<li>ออกแบบและสร้าง Schema ใน SQLite (<code>sessions</code>, <code>players</code>, <code>matches</code>)</li>
+<li>สร้างหน้า UI สำหรับจัดการก๊วน (เพิ่ม/ลบ ผู้เล่น) และปุ่มล้างข้อมูล</li>
+</ul>
+<h3>✅ Phase 2: The Matchmaking Engine</h3>
+<ul>
+<li>พัฒนาระบบสุ่มคิวตามจำนวนเกมที่เล่น (Strict Fair Rotation)</li>
+<li>เขียนลอจิกจับคู่แบบทีม 2 คน และรองรับประเภทเดี่ยว</li>
+<li>สร้าง Dashboard แสดงรายการแมตช์ที่กำลังเล่นอยู่</li>
+</ul>
+<h3>✅ Phase 3: The Smart Scoreboard</h3>
+<ul>
+<li>สร้างหน้า Scoreboard แบบ High-Contrast รองรับแนวตั้งและแนวนอน</li>
+<li>ระบบปุ่มปรับแต้ม (+/-) และการแตะที่ตัวเลขเพื่อเพิ่มแต้ม</li>
+<li>ลอจิกตำแหน่งเสิร์ฟ และระบบ Auto-save คะแนนลง DB</li>
+</ul>
+<h3>✅ Phase 4: Polish &amp; Summary</h3>
+<ul>
+<li>เพิ่มหน้า Session Summary สรุปผลชนะ/แพ้ประจำวัน</li>
+<li>ทดสอบ Edge Cases และระบบออฟไลน์สมบูรณ์แบบ</li>
+</ul>
+<h3>✅ Phase 5: Advanced Settings &amp; Waiting List</h3>
+<ul>
+<li>ระบบ Match Settings (ตั้งค่าแต้มชนะแบบ Dynamic และระบบ Deuce)</li>
+<li>เพิ่มส่วน Waiting List แสดงรายชื่อผู้เล่นที่รอคิว (เศษ) เรียงตามลำดับความสำคัญ</li>
+<li>เพิ่มกฎ Consecutive Rest (กฎการพัก) เพื่อป้องกันคนเดิมลงเล่นติดกัน</li>
+</ul>
+<h3>✅ Phase 6: Cost Splitting &amp; Calculator (การจัดการค่าใช้จ่าย)</h3>
+<ul>
+<li><strong>Cost Input Form:</strong> สร้าง UI สำหรับกรอกค่าสนาม (จำนวนชั่วโมง * อัตราต่อชั่วโมง * จำนวนสนาม) และค่าลูกแบด (จำนวนลูก * ราคาต่อลูก)</li>
+<li><strong>Split Algorithms:</strong> พัฒนาระบบคำนวณการหารเงิน 2 แบบ:<ol>
+<li><em>Equal Split:</em> หารเท่ากันทุกคนที่เข้าร่วมเซสชัน</li>
+<li><em>Pro-rata Split:</em> หารตามสัดส่วนจำนวนเกมที่ลงเล่นจริง (เล่นเยอะหารเยอะ)</li>
+</ol>
+</li>
+<li><strong>Exclusion &amp; Adjustments:</strong> รองรับการเลือกติ๊กถูก/ติ๊กออก เพื่อไม่นำบางคนมาร่วมหาร หรือเว้นค่าใช้จ่ายบางส่วน</li>
+<li><strong>Payment Tracking:</strong> เพิ่มสถานะการชำระเงินของแต่ละคนในหน้า Session Summary (Paid / Unpaid)</li>
+<li><strong>Database Integration:</strong> ออกแบบฟิลด์เพิ่มในตาราง <code>sessions</code> ใน SQLite และเพิ่ม State ใน Zustand เพื่อเก็บข้อมูลค่าใช้จ่าย</li>
+<li><strong>Multi-Court Pricing:</strong> ค่าสนามคำนวณโดยคูณด้วยจำนวนสนาม (<code>total_courts</code>) ทำให้รองรับก๊วนที่เช่าหลายสนามพร้อมกัน</li>
+</ul>
+<h3>✅ Phase 7: Multi-Court Matchmaking (ระบบจัดสรรผู้เล่นแบบหลายสนาม)</h3>
+<ul>
+<li><strong>Court Count Setting:</strong> เพิ่มการตั้งค่า &quot;จำนวนสนาม (Total Courts)&quot; ในหน้าแดชบอร์ด (⚙️ ตั้งค่า) และหน้าหารค่าใช้จ่าย บันทึกลง SQLite และ Zustand State ทันที</li>
+<li><strong>Court-Grouped Dashboard:</strong> หน้าแดชบอร์ดแสดงแมตช์แบ่งกลุ่มตามหมายเลขคอร์ต (คอร์ต 1, คอร์ต 2, ...) โดยอัตโนมัติตามจำนวนสนามที่ตั้งไว้</li>
+<li><strong>Vacant Court Cards:</strong> คอร์ตที่ยังว่างอยู่จะแสดงการ์ด &quot;ว่าง&quot; พร้อมปุ่ม <strong>&quot;+ สุ่มลงคอร์ตนี้&quot;</strong> ให้กดสุ่มผู้เล่นลงสนามนั้นๆ โดยตรง</li>
+<li><strong>Auto-Detect Court:</strong> ปุ่ม &quot;เพิ่ม 1 แมตช์&quot; จะหาคอร์ตที่ว่างอยู่อัตโนมัติ (คอร์ต 1 → 2 → ...) โดยไม่ต้องระบุเอง</li>
+<li><strong>Round-Based Bulk Generation:</strong> ระบบสุ่มล่วงหน้า (<code>bulkMatchGeneration</code>) สุ่มเป็นรอบ โดยใน 1 รอบจะกระจายแมตช์ไปยังทุกคอร์ตที่เปิดใช้งาน พร้อมกลไกป้องกันผู้เล่นคนเดิมลงเล่นหลายสนามในเวลาเดียวกัน (Overlap Prevention)</li>
+<li><strong>Unit Tests:</strong> เขียน Unit Test ครอบคลุมกลไกสำคัญทั้งหมด รวมถึงการคำนวณราคาแบบหลายสนาม และการสุ่มแมตช์แยกคอร์ตใน <code>usePlayerStore</code></li>
+</ul>
+<hr>
+<h2>⚖️ Engineering Standards (มาตรฐานการพัฒนา)</h2>
+<ol>
+<li><strong>The Rule of Fairness:</strong> ห้ามสุ่มแบบ 100% ต้องใช้ Priority Weighting เพื่อความยุติธรรมสูงสุด</li>
+<li><strong>The Rule of Service:</strong> ลอจิกซ้าย/ขวาต้องแม่นยำตามกติกาสากล</li>
+<li><strong>Zero-Network Policy:</strong> โค้ดหลักต้องไม่พึ่งพา API ภายนอก</li>
+<li><strong>Auto-Save Resilience:</strong> สถานะของแมตช์ต้องถูกบันทึกตลอดเวลา ป้องกันกรณีแบตเตอรี่หมดหรือแอปแครช</li>
+<li><strong>The Rule of Cost Transparency:</strong> ระบบการหารค่าใช้จ่ายต้องชัดเจน ตรวจสอบทศนิยมการปัดเศษสตางค์อย่างรัดกุม (Rounding Error Handling) และห้ามให้เกิดการหารด้วยศูนย์ (Division by Zero Protection)</li>
+<li><strong>Mandatory Feature Testing Rule:</strong> ทุกครั้งที่มีการแก้ไขฟีเจอร์เดิม หรือเพิ่มฟีเจอร์ใหม่เข้ามาในระบบ <strong>ต้องทำการเขียนหรืออัปเดต Unit Test คู่กันเสมอ</strong> เพื่อยืนยันความถูกต้องและป้องกันไม่ให้โค้ดใหม่ทำให้ระบบหลุดจากความคาดหมายเดิม (Regression prevention)</li>
+</ol>
+
+</body>
+</html>

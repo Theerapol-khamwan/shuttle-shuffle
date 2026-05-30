@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, 
   View, 
-  Text, 
-  TouchableOpacity, 
   Alert,
   useWindowDimensions
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePlayerStore } from '../../src/store/usePlayerStore';
-import { StatusBar } from 'expo-status-bar';
 import { checkWinner, isGamePoint, getServiceSide } from '../../src/logic/scoreboard';
+import { colors } from '../../src/ui/tokens/colors';
+import { spacing, borderRadius } from '../../src/ui/tokens/spacing';
+import { NeoText, NeoButton, NeoIcon } from '../../src/ui/atoms';
+import { ScorePanel, AppBar } from '../../src/ui/organisms';
+import { ScoreboardTemplate } from '../../src/ui/templates';
 
 export default function Scoreboard() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -40,10 +42,13 @@ export default function Scoreboard() {
   if (!match) {
     return (
       <View style={styles.center}>
-        <Text style={{ color: '#fff' }}>ไม่พบข้อมูลแมตช์</Text>
-        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 20 }}>
-          <Text style={{ color: '#2196F3' }}>กลับไปที่แดชบอร์ด</Text>
-        </TouchableOpacity>
+        <NeoText variant="bodyBold">ไม่พบข้อมูลแมตช์</NeoText>
+        <NeoButton
+          variant="primary"
+          title="กลับไปที่แดชบอร์ด"
+          onPress={() => router.back()}
+          style={styles.backBtnCenter}
+        />
       </View>
     );
   }
@@ -99,245 +104,129 @@ export default function Scoreboard() {
   const currentServingScore = servingTeam === 'A' ? scoreA : scoreB;
   const serviceSide = getServiceSide(currentServingScore);
 
-  const TeamSection = ({ team, score, label, isGamePoint }: { team: 'A' | 'B', score: number, label: string, isGamePoint: boolean }) => (
-    <View style={[styles.teamSection, team === 'A' ? styles.teamA : styles.teamB]}>
-      <Text style={styles.teamName} numberOfLines={1}>{label}</Text>
-      
-      {isGamePoint && (
-        <View style={styles.gamePointBadge}>
-          <Text style={styles.gamePointText}>GAME POINT</Text>
-        </View>
-      )}
-
-      <View style={styles.scoreControlRow}>
-        <TouchableOpacity 
-          style={styles.adjustButton} 
-          onPress={() => handleScoreChange(team, -1)}
-        >
-          <Text style={styles.adjustButtonText}>-</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.scoreTapArea} 
-          onPress={() => handleScoreChange(team, 1)}
-        >
-          <Text style={[styles.scoreText, { fontSize: isLandscape ? height * 0.5 : width * 0.4 }]}>
-            {score}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.adjustButton} 
-          onPress={() => handleScoreChange(team, 1)}
-        >
-          <Text style={styles.adjustButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
-
-      {servingTeam === team && (
-        <View style={[styles.serviceIndicator, serviceSide === 'LEFT' ? styles.serviceLeft : styles.serviceRight]}>
-          <Text style={styles.serviceText}>SERVING {serviceSide}</Text>
-        </View>
-      )}
-    </View>
-  );
-
   return (
-    <View style={styles.container}>
-      <StatusBar hidden />
-      
+    <ScoreboardTemplate>
+      {/* Score Panels (Side by Side or Stacked) */}
       <View style={[styles.scoreboardBody, { flexDirection: isLandscape ? 'row' : 'column' }]}>
-        <TeamSection 
+        <ScorePanel 
           team="A" 
           score={scoreA} 
           isGamePoint={isGamePointA}
           label={`${getPlayerName(match.team_a_p1)}${match.team_a_p2 ? ` & ${getPlayerName(match.team_a_p2)}` : ''}`}
+          isServing={servingTeam === 'A'}
+          serviceSide={serviceSide}
+          onScoreChange={handleScoreChange}
+          isLandscape={isLandscape}
         />
-        <TeamSection 
+        <ScorePanel 
           team="B" 
           score={scoreB} 
           isGamePoint={isGamePointB}
           label={`${getPlayerName(match.team_b_p1)}${match.team_b_p2 ? ` & ${getPlayerName(match.team_b_p2)}` : ''}`}
+          isServing={servingTeam === 'B'}
+          serviceSide={serviceSide}
+          onScoreChange={handleScoreChange}
+          isLandscape={isLandscape}
         />
       </View>
 
-      {/* Floating Menu Button */}
-      <TouchableOpacity 
-        style={styles.menuToggleBtn} 
+      {/* Floating Menu Button (Neo Styled Hamburger/Close) */}
+      <NeoButton
+        variant="icon"
+        icon={
+          <NeoIcon
+            name={showControls ? 'close' : 'menu'}
+            size={24}
+            color={colors.onBackground}
+          />
+        }
         onPress={() => setShowControls(!showControls)}
-      >
-        <Text style={styles.menuToggleText}>{showControls ? 'ซ่อนเมนู' : '☰ เมนู'}</Text>
-      </TouchableOpacity>
+        style={{
+          ...styles.menuToggleBtn,
+          opacity: showControls ? 1.0 : 0.4
+        }}
+      />
 
+      {/* Controls Overlay Card (Neo Styled Dropdown) */}
       {showControls && (
         <View style={styles.controlsOverlay}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.controlText}>กลับ</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.finishButton} onPress={handleFinishMatch}>
-            <Text style={styles.finishText}>จบแมตช์</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.swapButton} onPress={() => setServingTeam(servingTeam === 'A' ? 'B' : 'A')}>
-            <Text style={styles.controlText}>สลับฝั่งเสิร์ฟ</Text>
-          </TouchableOpacity>
+          <NeoButton
+            size="sm"
+            variant="ghost"
+            title="กลับหน้าหลัก"
+            onPress={() => router.back()}
+            fullWidth
+            style={styles.overlayBtn}
+          />
+          <View style={{ height: spacing.xs }} />
+          <NeoButton
+            size="sm"
+            variant="ghost"
+            title="สลับผู้เสิร์ฟ"
+            onPress={() => setServingTeam(servingTeam === 'A' ? 'B' : 'A')}
+            fullWidth
+            style={styles.overlayBtn}
+          />
+          <View style={{ height: spacing.xs }} />
+          <NeoButton
+            size="sm"
+            variant="primary"
+            title="จบการแข่งขัน"
+            onPress={handleFinishMatch}
+            backgroundColor={colors.errorContainer} // soft pink
+            fullWidth
+            style={styles.overlayBtn}
+          />
         </View>
       )}
-    </View>
+    </ScoreboardTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',
+    backgroundColor: colors.background,
+    padding: spacing.xl,
+  },
+  backBtnCenter: {
+    marginTop: spacing.lg,
   },
   scoreboardBody: {
     flex: 1,
-  },
-  teamSection: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-    position: 'relative',
-  },
-  teamA: {
-    backgroundColor: '#1a237e',
-  },
-  teamB: {
-    backgroundColor: '#b71c1c',
-  },
-  teamName: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    position: 'absolute',
-    top: 20,
-    zIndex: 10,
-    paddingHorizontal: 10,
-  },
-  gamePointBadge: {
-    backgroundColor: '#ffd600',
-    paddingHorizontal: 10,
-    paddingVertical: 2,
-    borderRadius: 4,
-    position: 'absolute',
-    top: 50,
-    zIndex: 11,
-  },
-  gamePointText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  scoreControlRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  scoreTapArea: {
-    paddingHorizontal: 20,
-  },
-  scoreText: {
-    color: '#fff',
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  adjustButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  adjustButtonText: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  serviceIndicator: {
-    position: 'absolute',
-    bottom: 30,
-    backgroundColor: '#ffd600',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    zIndex: 10,
-  },
-  serviceLeft: {
-    left: 20,
-  },
-  serviceRight: {
-    right: 20,
-  },
-  serviceText: {
-    color: '#000',
-    fontWeight: '900',
-    fontSize: 14,
+    padding: spacing.sm,
   },
   menuToggleBtn: {
     position: 'absolute',
-    top: 40,
-    right: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 20,
+    top: spacing.md,
+    right: spacing.md,
     zIndex: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  menuToggleText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   controlsOverlay: {
     position: 'absolute',
-    bottom: 20,
-    left: '10%',
-    width: '80%',
-    backgroundColor: 'rgba(34,34,34,0.95)',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderRadius: 15,
+    top: 70,
+    right: spacing.md,
+    width: 200,
+    backgroundColor: '#ffffff',
+    borderWidth: spacing.strokeThick,
+    borderColor: colors.onBackground,
+    borderRadius: borderRadius.md,
+    flexDirection: 'column',
+    padding: spacing.sm,
     zIndex: 90,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
+    // Solid Shadow
+    shadowColor: colors.onBackground,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
   },
-  controlText: {
-    color: '#aaa',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  finishButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 25,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  finishText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  backButton: {
-    padding: 10,
-  },
-  swapButton: {
-    padding: 10,
+  overlayBtn: {
+    minHeight: 40,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
   },
 });
+

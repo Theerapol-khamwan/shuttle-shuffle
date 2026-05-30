@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, 
   View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  FlatList, 
-  Alert 
+  Alert,
+  FlatList
 } from 'react-native';
 import { usePlayerStore } from '../src/store/usePlayerStore';
 import { useRouter } from 'expo-router';
+import { colors } from '../src/ui/tokens/colors';
+import { spacing } from '../src/ui/tokens/spacing';
+import { NeoText, NeoButton, NeoInput } from '../src/ui/atoms';
+import { PlayerCard, AppBar } from '../src/ui/organisms';
+import { ScreenTemplate } from '../src/ui/templates';
 
 export default function PlayerSetup() {
   const [name, setName] = useState('');
@@ -61,166 +63,136 @@ export default function PlayerSetup() {
     );
   };
 
+  const appBarHeader = (
+    <AppBar
+      title="จัดการผู้เล่น"
+      leftIcon="arrow-back"
+      onLeftPress={() => router.replace('/')}
+    />
+  );
+
   return (
-    <View style={styles.container}>
+    <ScreenTemplate scrollable={false} header={appBarHeader} style={styles.screenContainer}>
+      {/* Header Row */}
       <View style={styles.headerRow}>
-        <Text style={styles.header}>👥 ผู้เล่น ({players.length})</Text>
+        <NeoText variant="headlineMd" style={styles.headerTitle}>
+          👥 รายชื่อผู้เล่น ({players.length})
+        </NeoText>
         {players.length > 0 && (
-          <TouchableOpacity onPress={handleClearAll}>
-            <Text style={styles.clearText}>ล้างทั้งหมด</Text>
-          </TouchableOpacity>
+          <NeoButton
+            variant="ghost"
+            size="sm"
+            title="ล้างทั้งหมด"
+            onPress={handleClearAll}
+          />
         )}
       </View>
       
+      {/* Input Container */}
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
+        <NeoInput
           placeholder="ระบุชื่อผู้เล่น"
           value={name}
           onChangeText={setName}
           onSubmitEditing={handleAddPlayer}
+          style={styles.input}
         />
-        <TouchableOpacity style={styles.addButton} onPress={handleAddPlayer}>
-          <Text style={styles.addButtonText}>เพิ่ม</Text>
-        </TouchableOpacity>
+        <NeoButton
+          variant="primary"
+          title="เพิ่ม"
+          onPress={handleAddPlayer}
+          style={styles.addBtn}
+        />
       </View>
 
+      {/* Roster List */}
       <FlatList
         data={players}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.playerItem}>
-            <View>
-              <Text style={styles.playerName}>{item.name}</Text>
-              <Text style={styles.playerStats}>เล่นไปแล้ว: {item.games_played} เกม</Text>
-            </View>
-            <TouchableOpacity 
-              onPress={() => handleRemovePlayer(item.id, item.name)}
-              style={styles.deleteButton}
-            >
-              <Text style={styles.deleteButtonText}>ลบ</Text>
-            </TouchableOpacity>
-          </View>
+          <PlayerCard
+            name={item.name}
+            gamesPlayed={item.games_played}
+            onDelete={() => handleRemovePlayer(item.id, item.name)}
+            status="waiting"
+          />
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>ยังไม่มีรายชื่อผู้เล่น เพิ่มชื่อด้านบนได้เลย</Text>
+          <NeoText variant="body" color={colors.outline} style={styles.emptyText}>
+            ยังไม่มีรายชื่อผู้เล่น เพิ่มชื่อด้านบนได้เลย 🏸
+          </NeoText>
         }
         contentContainerStyle={styles.listContent}
+        style={styles.list}
       />
 
-      <TouchableOpacity 
-        style={[styles.nextButton, players.length < 2 && styles.nextButtonDisabled]}
-        disabled={players.length < 2}
-        onPress={() => router.push('/dashboard')}
-      >
-        <Text style={styles.nextButtonText}>
-          {players.length < 2 ? 'ต้องมีอย่างน้อย 2 คน' : 'ดำเนินการต่อ'}
-        </Text>
-      </TouchableOpacity>
-    </View>
+      {/* Next Step CTA */}
+      <View style={styles.bottomCta}>
+        <NeoButton
+          variant="primary"
+          title={players.length < 2 ? 'ต้องมีอย่างน้อย 2 คน' : 'ดำเนินการต่อ (NEXT)'}
+          disabled={players.length < 2}
+          onPress={() => router.push('/dashboard')}
+          fullWidth
+        />
+      </View>
+    </ScreenTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screenContainer: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 20,
+    paddingBottom: 0,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.md,
+    marginTop: spacing.sm,
   },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '800',
   },
-  clearText: {
-    color: '#FF5252',
-    fontWeight: '600',
+  clearBtn: {
+    minHeight: 36,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
   },
   inputContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    width: '100%',
   },
   input: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    fontSize: 16,
+    marginRight: spacing.sm,
   },
-  addButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 20,
-    justifyContent: 'center',
-    borderRadius: 8,
-    marginLeft: 10,
+  addBtn: {
+    height: 48,
+    minHeight: 48,
   },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+  list: {
+    flex: 1,
   },
   listContent: {
-    paddingBottom: 80,
-  },
-  playerItem: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    elevation: 1,
-  },
-  playerName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  playerStats: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-  deleteButton: {
-    padding: 8,
-  },
-  deleteButtonText: {
-    color: '#FF5252',
-    fontWeight: '600',
+    paddingBottom: 100,
   },
   emptyText: {
     textAlign: 'center',
-    marginTop: 50,
-    color: '#999',
+    marginTop: 60,
     fontSize: 16,
   },
-  nextButton: {
+  bottomCta: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: '#2196F3',
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    elevation: 3,
-  },
-  nextButtonDisabled: {
-    backgroundColor: '#bdbdbd',
-  },
-  nextButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    bottom: spacing.lg,
+    left: spacing.marginMobile,
+    right: spacing.marginMobile,
+    backgroundColor: 'transparent',
+    paddingVertical: spacing.sm,
   },
 });
+

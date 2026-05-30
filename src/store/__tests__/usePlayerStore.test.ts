@@ -30,7 +30,7 @@ describe('PlayerStore (Zustand)', () => {
       getFirstAsync: jest.fn(),
       getAllAsync: jest.fn().mockResolvedValue([]),
     };
-    (getDb as jest.fn).mockResolvedValue(mockDb);
+    (getDb as any).mockResolvedValue(mockDb);
   });
 
   it('ควรเริ่มต้น Session ใหม่ได้ถูกต้อง', async () => {
@@ -48,7 +48,9 @@ describe('PlayerStore (Zustand)', () => {
     usePlayerStore.setState({
       currentSession: { 
         id: 's1', date: '', total_courts: 1, status: 'active', 
-        winning_score: 21, enable_deuce: true 
+        winning_score: 21, enable_deuce: true,
+        court_hourly_rate: 0, hours_played: 0, shuttle_unit_price: 0,
+        shuttles_used: 0, cost_split_method: 'equal'
       }
     });
 
@@ -66,8 +68,13 @@ describe('PlayerStore (Zustand)', () => {
 
   it('ควรลบผู้เล่นและล้างข้อมูลที่เกี่ยวข้องได้', async () => {
     usePlayerStore.setState({
-      currentSession: { id: 's1', date: '', total_courts: 1, status: 'active', winning_score: 21, enable_deuce: true },
-      players: [{ id: 'p1', name: 'A', games_played: 0, session_id: 's1' }]
+      currentSession: { 
+        id: 's1', date: '', total_courts: 1, status: 'active', 
+        winning_score: 21, enable_deuce: true,
+        court_hourly_rate: 0, hours_played: 0, shuttle_unit_price: 0,
+        shuttles_used: 0, cost_split_method: 'equal'
+      },
+      players: [{ id: 'p1', name: 'A', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false }]
     });
 
     await usePlayerStore.getState().removePlayer('p1');
@@ -85,16 +92,21 @@ describe('PlayerStore (Zustand)', () => {
   it('ควรสุ่มแมตช์แยกหลายสนามได้เมื่อมี total_courts มากกว่า 1', async () => {
     // กำหนดสนามเป็น 2 สนาม มีผู้เล่น 8 คน (พอดีสำหรับคู่ 2 แมตช์)
     usePlayerStore.setState({
-      currentSession: { id: 's1', date: '', total_courts: 2, status: 'active', winning_score: 21, enable_deuce: true },
+      currentSession: { 
+        id: 's1', date: '', total_courts: 2, status: 'active', 
+        winning_score: 21, enable_deuce: true,
+        court_hourly_rate: 0, hours_played: 0, shuttle_unit_price: 0,
+        shuttles_used: 0, cost_split_method: 'equal'
+      },
       players: [
-        { id: 'p1', name: 'P1', games_played: 0, session_id: 's1' },
-        { id: 'p2', name: 'P2', games_played: 0, session_id: 's1' },
-        { id: 'p3', name: 'P3', games_played: 0, session_id: 's1' },
-        { id: 'p4', name: 'P4', games_played: 0, session_id: 's1' },
-        { id: 'p5', name: 'P5', games_played: 0, session_id: 's1' },
-        { id: 'p6', name: 'P6', games_played: 0, session_id: 's1' },
-        { id: 'p7', name: 'P7', games_played: 0, session_id: 's1' },
-        { id: 'p8', name: 'P8', games_played: 0, session_id: 's1' },
+        { id: 'p1', name: 'P1', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p2', name: 'P2', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p3', name: 'P3', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p4', name: 'P4', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p5', name: 'P5', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p6', name: 'P6', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p7', name: 'P7', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p8', name: 'P8', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
       ]
     });
 

@@ -2,17 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { 
   StyleSheet, 
   View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Switch
+  Alert,
+  Switch,
+  TouchableOpacity
 } from 'react-native';
 import { usePlayerStore, Match } from '../src/store/usePlayerStore';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getDb } from '../src/database/db';
 import { calculateSplits } from '../src/logic/costCalculator';
+import { colors } from '../src/ui/tokens/colors';
+import { spacing, borderRadius } from '../src/ui/tokens/spacing';
+import { NeoText, NeoButton, NeoDivider } from '../src/ui/atoms';
+import { PlayerRankingList, CostSummaryCard, AppBar } from '../src/ui/organisms';
+import { CostInputRow } from '../src/ui/molecules';
+import { ScreenTemplate } from '../src/ui/templates';
 
 interface PlayerStat {
   id: string;
@@ -126,8 +129,17 @@ export default function Summary() {
   };
 
   const handleFinishDay = async () => {
-    await endSession();
-    router.replace('/');
+    Alert.alert(
+      'ปิดรอบวัน',
+      'คุณแน่ใจว่าต้องการจบเซสชันวันนี้แล้วใช่หรือไม่? ข้อมูลทั้งหมดจะถูกบันทึกและระบบจะเริ่มรอบใหม่',
+      [
+        { text: 'ยกเลิก', style: 'cancel' },
+        { text: 'ตกลง', style: 'default', onPress: async () => {
+          await endSession();
+          router.replace('/');
+        }}
+      ]
+    );
   };
 
   const rateVal = parseFloat(courtHourlyRate) || 0;
@@ -143,462 +155,314 @@ export default function Summary() {
   // Calculate split costs dynamically
   const costShares = currentSession ? calculateSplits(players, currentSession) : {};
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.header}>🏆 สรุปผลประจำวัน</Text>
+  const appBarHeader = (
+    <AppBar
+      title="สรุปผลประจำวัน"
+      leftIcon="arrow-back"
+      onLeftPress={() => router.replace('/dashboard')}
+    />
+  );
 
-      {/* Tabs */}
+  return (
+    <ScreenTemplate scrollable={true} header={appBarHeader} style={styles.screenContainer}>
+
+      {/* Tabs Switcher Row */}
       <View style={styles.tabBar}>
-        <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'stats' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('stats')}
-        >
-          <Text style={[styles.tabButtonText, activeTab === 'stats' && styles.tabButtonTextActive]}>📊 ผลการแข่งขัน</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'cost' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('cost')}
-        >
-          <Text style={[styles.tabButtonText, activeTab === 'cost' && styles.tabButtonTextActive]}>💰 ค่าสนามและค่าลูก</Text>
-        </TouchableOpacity>
+        <View style={styles.flexHalf}>
+          <NeoButton
+            variant={activeTab === 'stats' ? 'primary' : 'ghost'}
+            title="📊 ผลการแข่งขัน"
+            onPress={() => setActiveTab('stats')}
+            fullWidth
+          />
+        </View>
+        <View style={styles.flexHalf}>
+          <NeoButton
+            variant={activeTab === 'cost' ? 'primary' : 'ghost'}
+            title="💰 ค่าใช้จ่ายก๊วน"
+            onPress={() => setActiveTab('cost')}
+            fullWidth
+          />
+        </View>
       </View>
 
       {activeTab === 'stats' ? (
         <View style={styles.tabContent}>
-          <View style={styles.tableHeader}>
-            <Text style={[styles.col, styles.nameCol]}>ชื่อ</Text>
-            <Text style={styles.col}>เล่น</Text>
-            <Text style={styles.col}>ชนะ</Text>
-            <Text style={styles.col}>แพ้</Text>
-          </View>
-
-          <FlatList
-            data={stats}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.row}>
-                <Text style={[styles.col, styles.nameCol, styles.playerName]}>{item.name}</Text>
-                <Text style={styles.col}>{item.games}</Text>
-                <Text style={[styles.col, styles.winText]}>{item.wins}</Text>
-                <Text style={[styles.col, styles.lossText]}>{item.losses}</Text>
-              </View>
-            )}
-            contentContainerStyle={styles.listContainer}
-          />
+          {/* Rank Roster Organism */}
+          <PlayerRankingList stats={stats} />
         </View>
       ) : (
-        <ScrollView style={styles.scrollViewContent}>
-          {/* Cost Inputs Panel */}
+        <View style={styles.tabContent}>
+          {/* Cost Inputs Panel Card */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>⚙️ ตั้งค่าใช้จ่าย</Text>
+            <NeoText variant="headlineMd" style={styles.cardTitle}>
+              ⚙️ ตั้งค่าใช้จ่าย
+            </NeoText>
             
-            <View style={styles.inputGrid}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>ค่าสนาม / ชม. (฿)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={courtHourlyRate}
-                  onChangeText={(val) => {
-                    setCourtHourlyRate(val);
-                    handleCostFieldChange(val, hoursPlayed, shuttleUnitPrice, shuttlesUsed, splitMethod);
-                  }}
-                  placeholder="0"
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>จำนวนชั่วโมง (ชม.)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={hoursPlayed}
-                  onChangeText={(val) => {
-                    setHoursPlayed(val);
-                    handleCostFieldChange(courtHourlyRate, val, totalCourts, shuttleUnitPrice, shuttlesUsed, splitMethod);
-                  }}
-                  placeholder="0"
-                />
-              </View>
-            </View>
+            <CostInputRow
+              label="ค่าสนาม / ชม. (฿)"
+              unit="บาท"
+              value={courtHourlyRate}
+              onChangeText={(val) => {
+                setCourtHourlyRate(val);
+                handleCostFieldChange(val, hoursPlayed, totalCourts, shuttleUnitPrice, shuttlesUsed, splitMethod);
+              }}
+            />
+            
+            <CostInputRow
+              label="จำนวนชั่วโมง (ชม.)"
+              unit="ชั่วโมง"
+              value={hoursPlayed}
+              onChangeText={(val) => {
+                setHoursPlayed(val);
+                handleCostFieldChange(courtHourlyRate, val, totalCourts, shuttleUnitPrice, shuttlesUsed, splitMethod);
+              }}
+            />
 
-            <View style={styles.inputGrid}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>จำนวนสนาม (สนาม)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={totalCourts}
-                  onChangeText={(val) => {
-                    setTotalCourts(val);
-                    handleCostFieldChange(courtHourlyRate, hoursPlayed, val, shuttleUnitPrice, shuttlesUsed, splitMethod);
-                  }}
-                  placeholder="1"
-                />
-              </View>
-            </View>
+            <CostInputRow
+              label="จำนวนสนาม (สนาม)"
+              unit="สนาม"
+              value={totalCourts}
+              onChangeText={(val) => {
+                setTotalCourts(val);
+                handleCostFieldChange(courtHourlyRate, hoursPlayed, val, shuttleUnitPrice, shuttlesUsed, splitMethod);
+              }}
+            />
 
-            <View style={styles.inputGrid}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>ราคาลูกแบด / ลูก (฿)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={shuttleUnitPrice}
-                  onChangeText={(val) => {
-                    setShuttleUnitPrice(val);
-                    handleCostFieldChange(courtHourlyRate, hoursPlayed, totalCourts, val, shuttlesUsed, splitMethod);
-                  }}
-                  placeholder="0"
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>จำนวนลูกแบด (ลูก)</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={shuttlesUsed}
-                  onChangeText={(val) => {
-                    setShuttlesUsed(val);
-                    handleCostFieldChange(courtHourlyRate, hoursPlayed, totalCourts, shuttleUnitPrice, val, splitMethod);
-                  }}
-                  placeholder="0"
-                />
-              </View>
-            </View>
+            <CostInputRow
+              label="ราคาลูกแบด / ลูก (฿)"
+              unit="บาท"
+              value={shuttleUnitPrice}
+              onChangeText={(val) => {
+                setShuttleUnitPrice(val);
+                handleCostFieldChange(courtHourlyRate, hoursPlayed, totalCourts, val, shuttlesUsed, splitMethod);
+              }}
+            />
 
-            {/* Split Method */}
-            <Text style={styles.inputLabel}>วิธีหารเงิน</Text>
+            <CostInputRow
+              label="จำนวนลูกแบด (ลูก)"
+              unit="ลูก"
+              value={shuttlesUsed}
+              onChangeText={(val) => {
+                setShuttlesUsed(val);
+                handleCostFieldChange(courtHourlyRate, hoursPlayed, totalCourts, shuttleUnitPrice, val, splitMethod);
+              }}
+            />
+
+            {/* Split Method Selector */}
+            <NeoText variant="bodyBold" style={styles.splitLabel}>
+              วิธีหารเงิน
+            </NeoText>
             <View style={styles.splitMethodContainer}>
-              <TouchableOpacity 
-                style={[styles.splitMethodButton, splitMethod === 'equal' && styles.splitMethodActive]}
-                onPress={() => {
-                  setSplitMethod('equal');
-                  handleCostFieldChange(courtHourlyRate, hoursPlayed, totalCourts, shuttleUnitPrice, shuttlesUsed, 'equal');
-                }}
-              >
-                <Text style={[styles.splitMethodText, splitMethod === 'equal' && styles.splitMethodTextActive]}>หารเท่ากันทุกคน (Equal)</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.splitMethodButton, splitMethod === 'pro_rata' && styles.splitMethodActive]}
-                onPress={() => {
-                  setSplitMethod('pro_rata');
-                  handleCostFieldChange(courtHourlyRate, hoursPlayed, totalCourts, shuttleUnitPrice, shuttlesUsed, 'pro_rata');
-                }}
-              >
-                <Text style={[styles.splitMethodText, splitMethod === 'pro_rata' && styles.splitMethodTextActive]}>หารตามรอบที่เล่น (Pro-rata)</Text>
-              </TouchableOpacity>
+              <View style={styles.flexHalf}>
+                <NeoButton
+                  variant={splitMethod === 'equal' ? 'primary' : 'ghost'}
+                  title="หารเท่ากัน"
+                  onPress={() => {
+                    setSplitMethod('equal');
+                    handleCostFieldChange(courtHourlyRate, hoursPlayed, totalCourts, shuttleUnitPrice, shuttlesUsed, 'equal');
+                  }}
+                  fullWidth
+                />
+              </View>
+              <View style={styles.flexHalf}>
+                <NeoButton
+                  variant={splitMethod === 'pro_rata' ? 'primary' : 'ghost'}
+                  title="หารตามรอบ"
+                  onPress={() => {
+                    setSplitMethod('pro_rata');
+                    handleCostFieldChange(courtHourlyRate, hoursPlayed, totalCourts, shuttleUnitPrice, shuttlesUsed, 'pro_rata');
+                  }}
+                  fullWidth
+                />
+              </View>
             </View>
           </View>
 
-          {/* Cost Summary Info */}
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryText}>ค่าคอร์ททั้งหมด: ({courtsVal} สนาม)</Text>
-              <Text style={styles.summaryValue}>฿{totalCourtCost.toFixed(2)}</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryText}>ค่าลูกแบดทั้งหมด:</Text>
-              <Text style={styles.summaryValue}>฿{totalShuttleCost.toFixed(2)}</Text>
-            </View>
-            <View style={[styles.summaryRow, styles.grandTotalRow]}>
-              <Text style={styles.grandTotalText}>ยอดรวมค่าใช้จ่าย:</Text>
-              <Text style={styles.grandTotalValue}>฿{grandTotalCost.toFixed(2)}</Text>
-            </View>
-          </View>
+          {/* Grand Total Cost Highlight Card */}
+          <CostSummaryCard totalCost={grandTotalCost} />
 
-          {/* Player Cost Split Table */}
+          {/* Breakdown Card */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>👥 สัดส่วนผู้เล่น & การจ่ายเงิน</Text>
+            <View style={styles.breakdownRow}>
+              <NeoText variant="body" color={colors.outline}>
+                ค่าสนาม ({courtsVal} สนาม):
+              </NeoText>
+              <NeoText variant="bodyBold">
+                ฿{totalCourtCost.toFixed(2)}
+              </NeoText>
+            </View>
+            <View style={styles.breakdownRow}>
+              <NeoText variant="body" color={colors.outline}>
+                ค่าลูกแบด ({shuttlesVal} ลูก):
+              </NeoText>
+              <NeoText variant="bodyBold">
+                ฿{totalShuttleCost.toFixed(2)}
+              </NeoText>
+            </View>
+          </View>
+
+          {/* Player Cost Split Table Card */}
+          <View style={styles.card}>
+            <NeoText variant="headlineMd" style={styles.cardTitle}>
+              👥 สัดส่วนผู้เล่น & การจ่ายเงิน
+            </NeoText>
             {players.map((item) => {
               const playerShare = costShares[item.id] || 0;
+              const isExcluded = item.exclude_from_split;
+
               return (
-                <View key={item.id} style={[styles.playerCostRow, item.exclude_from_split && styles.playerExcluded]}>
+                <View key={item.id} style={[styles.playerCostRow, isExcluded && styles.playerExcluded]}>
                   <View style={styles.playerInfo}>
-                    <Text style={[styles.playerNameText, item.exclude_from_split && styles.textMuted]}>
+                    <NeoText variant="bodyBold" style={[styles.playerNameText, isExcluded && styles.textMuted]}>
                       {item.name}
-                    </Text>
-                    <Text style={styles.playerSubText}>
-                      เล่น {item.games_played} เกม • <Text style={styles.shareText}>฿{playerShare.toFixed(2)}</Text>
-                    </Text>
+                    </NeoText>
+                    <NeoText variant="bodySm" color={colors.outline}>
+                      เล่น {item.games_played} เกม • <NeoText variant="bodySm" color={colors.secondary} style={styles.shareText}>฿{playerShare.toFixed(2)}</NeoText>
+                    </NeoText>
                   </View>
 
                   <View style={styles.actionsContainer}>
                     {/* Exclude Toggle */}
                     <View style={styles.toggleGroup}>
-                      <Text style={styles.toggleLabel}>หาร</Text>
+                      <NeoText variant="labelSm" color={colors.outline} style={styles.toggleLabel}>
+                        หาร
+                      </NeoText>
                       <Switch
-                        value={!item.exclude_from_split}
+                        value={!isExcluded}
                         onValueChange={() => togglePlayerExclude(item.id)}
-                        trackColor={{ false: "#ccc", true: "#81b0ff" }}
-                        thumbColor={!item.exclude_from_split ? "#2196F3" : "#f4f3f4"}
+                        trackColor={{ false: colors.surfaceContainerHighest, true: colors.primaryContainer }}
+                        thumbColor={!isExcluded ? colors.primary : colors.outline}
                         style={styles.switchSize}
                       />
                     </View>
 
-                    {/* Paid Toggle */}
-                    <TouchableOpacity 
-                      disabled={item.exclude_from_split}
-                      style={[
-                        styles.paidButton, 
-                        item.is_paid ? styles.paidButtonSuccess : styles.paidButtonPending,
-                        item.exclude_from_split && styles.paidButtonDisabled
-                      ]}
+                    {/* Paid Toggle Button */}
+                    <NeoButton
+                      size="sm"
+                      variant={isExcluded ? 'ghost' : 'primary'}
+                      title={item.is_paid ? 'จ่ายแล้ว ✓' : 'ยังไม่จ่าย'}
                       onPress={() => togglePlayerPaid(item.id)}
-                    >
-                      <Text style={styles.paidButtonText}>
-                        {item.is_paid ? 'จ่ายแล้ว ✓' : 'ยังไม่จ่าย'}
-                      </Text>
-                    </TouchableOpacity>
+                      disabled={isExcluded}
+                      backgroundColor={item.is_paid ? '#4caf50' : colors.tertiaryContainer} // green vs soft pink
+                      style={styles.paidBtn}
+                    />
                   </View>
                 </View>
               );
             })}
           </View>
-        </ScrollView>
+        </View>
       )}
 
-      <View style={styles.bottomButtonsRow}>
-        <TouchableOpacity 
-          style={styles.backToDashboardButton} 
-          onPress={() => router.canGoBack() ? router.back() : router.replace('/dashboard')}
-        >
-          <Text style={styles.backToDashboardText}>🔙 กลับแดชบอร์ด</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.finishButton} onPress={handleFinishDay}>
-          <Text style={styles.finishButtonText}>🏁 ปิดรอบวัน</Text>
-        </TouchableOpacity>
+      {/* Footer Controls */}
+      <View style={styles.footerPanel}>
+        <View style={styles.navRow}>
+          <View style={styles.flexHalf}>
+            <NeoButton
+              variant="ghost"
+              title="🔙 แดชบอร์ด"
+              onPress={() => router.canGoBack() ? router.back() : router.replace('/dashboard')}
+              fullWidth
+            />
+          </View>
+          <View style={styles.flexHalf}>
+            <NeoButton
+              variant="primary"
+              title="🏁 ปิดรอบวัน"
+              onPress={handleFinishDay}
+              backgroundColor={colors.primaryContainer}
+              fullWidth
+            />
+          </View>
+        </View>
       </View>
-    </View>
+    </ScreenTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screenContainer: {
     flex: 1,
-    backgroundColor: '#f8fafc',
-    padding: 20,
   },
   header: {
     fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
-    color: '#0f172a',
+    fontWeight: '900',
+    marginVertical: spacing.md,
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#e2e8f0',
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 20,
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 8,
+    marginBottom: spacing.lg,
+    width: '100%',
   },
-  tabButtonActive: {
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  tabButtonText: {
-    color: '#64748b',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  tabButtonTextActive: {
-    color: '#0f172a',
+  flexHalf: {
+    flex: 1,
+    marginHorizontal: 4,
   },
   tabContent: {
-    flex: 1,
-  },
-  listContainer: {
-    paddingBottom: 10,
-  },
-  scrollViewContent: {
-    flex: 1,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: '#cbd5e1',
-    paddingBottom: 12,
-    marginBottom: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  col: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 15,
-    color: '#475569',
-  },
-  nameCol: {
-    flex: 2,
-    textAlign: 'left',
-  },
-  playerName: {
-    fontWeight: 'bold',
-    color: '#1e293b',
-  },
-  winText: {
-    color: '#10b981',
-    fontWeight: 'bold',
-  },
-  lossText: {
-    color: '#ef4444',
+    width: '100%',
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    backgroundColor: '#ffffff',
+    borderWidth: spacing.strokeThick,
+    borderColor: colors.onBackground,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    // Solid Shadow
+    shadowColor: colors.onBackground,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-    paddingBottom: 8,
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: spacing.md,
   },
-  inputGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-  },
-  inputGroup: {
-    flex: 1,
-    marginRight: 10,
-  },
-  inputLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#64748b',
-    marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 15,
-    color: '#1e293b',
-    backgroundColor: '#fff',
+  splitLabel: {
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   splitMethodContainer: {
     flexDirection: 'row',
-    marginTop: 6,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 10,
-    padding: 3,
+    width: '100%',
+    marginTop: spacing.xs,
   },
-  splitMethodButton: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  splitMethodActive: {
-    backgroundColor: '#2196F3',
-  },
-  splitMethodText: {
-    fontSize: 12,
-    color: '#64748b',
-    fontWeight: '600',
-  },
-  splitMethodTextActive: {
-    color: '#fff',
-  },
-  summaryCard: {
-    backgroundColor: '#f1f5f9',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-  },
-  summaryRow: {
+  breakdownRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  summaryText: {
-    fontSize: 14,
-    color: '#64748b',
-  },
-  summaryValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-  },
-  grandTotalRow: {
-    borderTopWidth: 1,
-    borderTopColor: '#cbd5e1',
-    paddingTop: 8,
-    marginTop: 8,
-    marginBottom: 0,
-  },
-  grandTotalText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  grandTotalValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#10b981',
+    paddingVertical: spacing.xs,
   },
   playerCostRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: colors.outlineVariant,
   },
   playerExcluded: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.surfaceContainerLow,
     opacity: 0.6,
   },
   playerInfo: {
-    flex: 1.5,
+    flex: 1.3,
   },
   playerNameText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  playerSubText: {
-    fontSize: 13,
-    color: '#64748b',
-    marginTop: 2,
+    fontSize: 16,
+    marginBottom: 2,
   },
   shareText: {
-    fontWeight: '700',
-    color: '#3b82f6',
+    fontWeight: '800',
   },
   textMuted: {
-    color: '#94a3b8',
     textDecorationLine: 'line-through',
+    color: colors.outline,
   },
   actionsContainer: {
     flex: 1.2,
@@ -608,74 +472,32 @@ const styles = StyleSheet.create({
   },
   toggleGroup: {
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: spacing.sm,
   },
   toggleLabel: {
-    fontSize: 10,
-    color: '#64748b',
+    fontSize: 9,
+    fontWeight: '700',
     marginBottom: 2,
-    fontWeight: '500',
   },
   switchSize: {
     transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
   },
-  paidButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 70,
+  paidBtn: {
+    minHeight: 36,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
   },
-  paidButtonSuccess: {
-    backgroundColor: '#10b981',
+  footerPanel: {
+    marginTop: spacing.lg,
+    paddingTop: spacing.md,
+    borderTopWidth: 1.5,
+    borderColor: colors.outlineVariant,
+    width: '100%',
+    marginBottom: spacing.xl,
   },
-  paidButtonPending: {
-    backgroundColor: '#f97316',
-  },
-  paidButtonDisabled: {
-    backgroundColor: '#e2e8f0',
-  },
-  paidButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  bottomButtonsRow: {
+  navRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  backToDashboardButton: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#64748b',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginRight: 10,
-    backgroundColor: '#fff',
-  },
-  backToDashboardText: {
-    color: '#64748b',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  finishButton: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  finishButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
+    width: '100%',
   },
 });
+

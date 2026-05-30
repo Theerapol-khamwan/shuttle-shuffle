@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>จัดการผู้เล่น</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Plus+Jakarta+Sans:wght@500&amp;family=Space+Grotesk:wght@700&amp;family=Sarabun:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#546500",
+                        "on-surface-variant": "#454932",
+                        "error-container": "#ffdad6",
+                        "background": "#fcf9f8",
+                        "primary-fixed": "#cbf200",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1c1b1b",
+                        "on-secondary-container": "#285f80",
+                        "on-secondary-fixed-variant": "#0c4b6c",
+                        "secondary": "#2e6385",
+                        "on-primary-fixed-variant": "#3f4c00",
+                        "inverse-primary": "#b2d400",
+                        "on-tertiary-fixed-variant": "#663a43",
+                        "secondary-container": "#a5d8ff",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#dcd9d9",
+                        "on-tertiary-container": "#905e67",
+                        "surface-container-low": "#f6f3f2",
+                        "outline-variant": "#c5c9ac",
+                        "tertiary-fixed": "#ffd9df",
+                        "on-primary-container": "#607400",
+                        "on-surface": "#1c1b1b",
+                        "on-secondary-fixed": "#001e2f",
+                        "on-primary-fixed": "#181e00",
+                        "outline": "#757960",
+                        "on-tertiary-fixed": "#330f19",
+                        "surface-container-high": "#ebe7e7",
+                        "secondary-fixed": "#c9e6ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e5e2e1",
+                        "surface-container-highest": "#e5e2e1",
+                        "secondary-fixed-dim": "#9accf3",
+                        "inverse-surface": "#313030",
+                        "surface-container": "#f0edec",
+                        "surface": "#fcf9f8",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fcf9f8",
+                        "tertiary": "#81515a",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#b2d400",
+                        "tertiary-fixed-dim": "#f4b6c1",
+                        "primary-container": "#d6ff00",
+                        "primary": "#546500",
+                        "inverse-on-surface": "#f3f0ef",
+                        "tertiary-container": "#ffe9eb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "gutter": "16px",
+                        "stroke-weight-thin": "1.5px",
+                        "margin-desktop": "40px",
+                        "stroke-weight-thick": "3px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Bricolage Grotesque", "Sarabun", "sans-serif"],
+                        "headline-lg": ["Bricolage Grotesque", "Sarabun", "sans-serif"],
+                        "headline-lg-mobile": ["Bricolage Grotesque", "Sarabun", "sans-serif"],
+                        "body-md": ["Plus Jakarta Sans", "Sarabun", "sans-serif"],
+                        "label-sm": ["Space Grotesk", "Sarabun", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            background-image: radial-gradient(theme('colors.outline-variant') 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .neo-border {
+            border: theme('spacing.stroke-weight-thick') solid theme('colors.on-background');
+        }
+        
+        .neo-shadow {
+            box-shadow: 4px 4px 0px 0px theme('colors.on-background');
+        }
+        
+        .neo-shadow-lg {
+            box-shadow: 8px 8px 0px 0px theme('colors.on-background');
+        }
+        
+        .neo-shadow-hover:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px theme('colors.on-background');
+        }
+        
+        .neo-shadow-active:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px 0px theme('colors.on-background');
+        }
+        
+        .hatch-pattern-playing {
+            background-image: repeating-linear-gradient(45deg, theme('colors.primary-container') 25%, transparent 25%, transparent 75%, theme('colors.primary-container') 75%, theme('colors.primary-container')), repeating-linear-gradient(45deg, theme('colors.primary-container') 25%, theme('colors.background') 25%, theme('colors.background') 75%, theme('colors.primary-container') 75%, theme('colors.primary-container'));
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+        }
+        
+        .hatch-pattern-waiting {
+            background-image: repeating-linear-gradient(45deg, theme('colors.secondary-container') 25%, transparent 25%, transparent 75%, theme('colors.secondary-container') 75%, theme('colors.secondary-container')), repeating-linear-gradient(45deg, theme('colors.secondary-container') 25%, theme('colors.background') 25%, theme('colors.background') 75%, theme('colors.secondary-container') 75%, theme('colors.secondary-container'));
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+        }
+
+        .hatch-pattern-resting {
+            background-image: repeating-linear-gradient(45deg, theme('colors.surface-variant') 25%, transparent 25%, transparent 75%, theme('colors.surface-variant') 75%, theme('colors.surface-variant')), repeating-linear-gradient(45deg, theme('colors.surface-variant') 25%, theme('colors.background') 25%, theme('colors.background') 75%, theme('colors.surface-variant') 75%, theme('colors.surface-variant'));
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+        }
+        
+        .highlight-marker {
+            position: relative;
+            display: inline-block;
+        }
+        .highlight-marker::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: -5px;
+            right: -5px;
+            height: 40%;
+            background-color: theme('colors.primary-container');
+            z-index: -1;
+            transform: rotate(-1deg);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md antialiased min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar Mobile -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 bg-background text-primary font-headline-lg-mobile text-headline-lg-mobile uppercase font-display-lg tracking-tighter text-on-background docked full-width top-0 border-b-stroke-weight-thick border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 sticky">
+<button aria-label="Menu" class="p-2 hover:bg-primary-container transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu</span>
+</button>
+<span class="highlight-marker">ผู้เล่น</span>
+<div class="w-10 h-10 rounded-full neo-border overflow-hidden bg-primary-container">
+<img alt="User Profile Doodle" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFntvS-G2zZs743uU2XrnVq7Q6Klv7TF_Vbvy4T-o7QhCT9UBQrup1JpYo44YHRr1AcDqOJzVmrydmorj8MWigfDye-HeyV4q0Ggv_cnv0b85kbS7DViGvV38GJCjvLril7s0Grh5XPXiqbognvgfVrYktXLShwtH4YRltnulqmu-vf5QO0YPbap1S8b_if154ZljNz3xW39zYbw2CiZfAAOCrEfPJZ4yMYJ0bIHgruhPAYw2-w0CIYIE8aJrxGXwqZiaXVRsXKlKp"/>
+</div>
+</header>
+<!-- TopAppBar Desktop -->
+<header class="hidden md:flex justify-between items-center w-full px-margin-desktop h-20 bg-background text-primary font-headline-lg text-headline-lg uppercase font-display-lg tracking-tighter text-on-background docked full-width top-0 border-b-stroke-weight-thick border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 sticky">
+<div class="flex items-center gap-6">
+<button aria-label="Menu" class="p-2 hover:bg-primary-container transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all rounded-full neo-border">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu</span>
+</button>
+<span class="highlight-marker">SHUTTLE SHUFFLE</span>
+</div>
+<nav class="flex gap-8">
+<a class="font-label-sm text-label-sm uppercase text-on-surface-variant hover:text-primary transition-colors flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">sports_tennis</span>
+                COURTS
+            </a>
+<a class="font-label-sm text-label-sm uppercase text-on-surface-variant hover:text-primary transition-colors flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">groups</span>
+                MATCHES
+            </a>
+<a class="font-label-sm text-label-sm uppercase text-primary hover:bg-primary-container hover:text-on-primary-container transition-colors flex flex-col items-center gap-1 bg-primary-container text-on-primary-container rounded-xl border-stroke-weight-thin border-on-background px-4 py-1 translate-y-[-4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" href="#">
+<span class="material-symbols-outlined">person</span>
+                PLAYERS
+            </a>
+<a class="font-label-sm text-label-sm uppercase text-on-surface-variant hover:text-primary transition-colors flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+                LEADER
+            </a>
+</nav>
+<div class="w-12 h-12 rounded-full neo-border overflow-hidden bg-primary-container neo-shadow">
+<img alt="User Profile Doodle" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7KoTxvvAlIbmo90XKo1TWvQIM3lDJ-JtELMF2ebc0Hnhi-R1go5pJULGp_zxWwVw5fq603UtkCNhG2-X3n0bC3Sfjh-cOg8HZkpgUpxYh8dCR9rO0gb1Hq6N28rVZvKp_BPH01ofihU1HrLfomwp4Zh-28S0bG4Y_LGtpHfxyjSGocCcpiwwFOMEmJRZiJ6wdfvmKDv8IQGC5Tn26H6uSQ2WscYqZskcFdCeDzubAVuMYSDQOg9NXej-2cxPPRNyeJ_CwXMC-gQzB"/>
+</div>
+</header>
+<main class="max-w-4xl mx-auto p-margin-mobile md:p-margin-desktop space-y-8">
+<!-- Add Player Section -->
+<section class="bg-surface rounded-xl neo-border neo-shadow p-6 relative transform rotate-1">
+<div class="absolute -top-4 -right-4 text-4xl transform rotate-12">✨</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile mb-4 highlight-marker">เพิ่มผู้เล่นใหม่</h2>
+<div class="flex gap-4">
+<input class="flex-grow font-body-md text-body-md p-3 rounded-lg neo-border focus:outline-none focus:bg-primary-container transition-colors" placeholder="ชื่อผู้เล่น... *" type="text"/>
+<button class="bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase p-3 rounded-lg neo-border neo-shadow neo-shadow-hover neo-shadow-active flex items-center justify-center min-w-[48px]">
+<span class="material-symbols-outlined font-bold" style="font-variation-settings: 'wght' 700;">add</span>
+</button>
+</div>
+</section>
+<!-- Player List Section -->
+<section class="space-y-6">
+<div class="flex justify-between items-end">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile">รายชื่อผู้เล่น (12)</h2>
+<div class="flex gap-2">
+<button aria-label="Filter Active" class="w-8 h-8 rounded-full bg-primary-container neo-border flex items-center justify-center text-sm font-bold neo-shadow-hover transition-transform">A</button>
+<button aria-label="Filter Waiting" class="w-8 h-8 rounded-full bg-secondary-container neo-border flex items-center justify-center text-sm font-bold neo-shadow-hover transition-transform">W</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+<!-- Player Card 1: Playing -->
+<article class="bg-surface rounded-xl neo-border neo-shadow p-4 flex items-center gap-4 transform -rotate-1 transition-transform hover:rotate-0">
+<div class="w-16 h-16 rounded-full neo-border bg-tertiary-container overflow-hidden shrink-0">
+<img alt="Player Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLPlpEevIG5uI7f9mmfCg1MNPqWS66G4VeFNp5qyKqp8PSDs8iS2iZT4gtZFpMR-VVhTWToJt0A07FulqFdmCLCv9d1reRRgeYcs1H1RaZawr3HWh6L1PefLazS45xOTgET6IIxSjQFpNotGfJ9QZWqHVOkBiFxCCMHB-Pd67eIfRp8KpmDFZeam1q9sxxcQe3VF-0m8hU_gehK4Ixy0vA8AnPSEhG4GzseUA-nxBGnISAHcXwtHW8CEeFXMJwkuCV36PUOWesC5Di"/>
+</div>
+<div class="flex-grow min-w-0">
+<h3 class="font-body-md text-body-md font-bold truncate">อเล็กซ์</h3>
+<div class="mt-2 flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary-fixed border border-on-background"></span>
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">กำลังเล่น</span>
+</div>
+</div>
+<button class="p-1 hover:bg-surface-variant rounded-md transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</article>
+<!-- Player Card 2: Waiting -->
+<article class="bg-surface rounded-xl neo-border neo-shadow p-4 flex items-center gap-4 transition-transform hover:-translate-y-1">
+<div class="w-16 h-16 rounded-full neo-border bg-secondary-container overflow-hidden shrink-0">
+<img alt="Player Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy0ipyGquRJtgFO_zQZ7in2hk_xHJ_OhEARe_Au2eVt83lxzS2xRgdo4727js9q75kkEXZ-d0CGqbjweVZw_NUd4hfW9lu_NqzAdLUWIrfYk46i3JS7t97QgggDSXDRsp0p4GgpBvgPstVwXjJvl7pl6yRoGDTGclNmvSRyd2H7ppIF2nFiMfIImyqtdpNvnTdZ_OkKYNBAT8sFJ5Tk-j4mc2sYc7LBkw6vSWQTd3icNNjPVJbufVS2t0nLP2Ep8e81Fr9BPusAE-H"/>
+</div>
+<div class="flex-grow min-w-0">
+<h3 class="font-body-md text-body-md font-bold truncate">แซม</h3>
+<div class="mt-2 flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary-fixed border border-on-background"></span>
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">รอเล่น (คิว #2)</span>
+</div>
+</div>
+<button class="p-1 hover:bg-surface-variant rounded-md transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</article>
+<!-- Player Card 3: Resting -->
+<article class="bg-surface rounded-xl neo-border neo-shadow p-4 flex items-center gap-4 transform rotate-2 transition-transform hover:rotate-0 opacity-80">
+<div class="w-16 h-16 rounded-full neo-border bg-surface-variant overflow-hidden shrink-0 grayscale hover:grayscale-0 transition-all">
+<img alt="Player Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4h6Cay5RCR7vBQwLzySpcAj_2tsprvs7f38cgt5q7zfsqdmzZhoXRUSyk6hYTDlY2BmoqjgqHy7g80Gn8xdr-n6P-AYlNQKkseRdwglz1lktqWtIz9x6-MIrYjHRFt0rsu2JutGnhp2QOeQL8qQlxhAxP1sigQPG2e65Rvvb36hyHaGxNmQkP0HAMTEacnlSzGd5MZ-EN5NmJjJ_QEVI-IQ1urgZZE8zUsYyNe6XTa_LlLYYMOgpzyLGECzmjaaB22K8Ja2MvibFY"/>
+</div>
+<div class="flex-grow min-w-0">
+<h3 class="font-body-md text-body-md font-bold truncate text-on-surface-variant">จอร์แดน</h3>
+<div class="mt-2 flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-surface-dim border border-on-background"></span>
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">พักผ่อน</span>
+</div>
+</div>
+<button class="p-1 hover:bg-surface-variant rounded-md transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</article>
+<!-- Player Card 4: Playing -->
+<article class="bg-surface rounded-xl neo-border neo-shadow p-4 flex items-center gap-4 transition-transform hover:-translate-y-1">
+<div class="w-16 h-16 rounded-full neo-border bg-primary-container overflow-hidden shrink-0">
+<img alt="Player Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBru4W7005kTwco-KFt-UUn8aXTwjnwP1flwIVsRnusW3_NeVXYCr1ikguy_X6-j-P-fz5EQBiAdj7FO17zOFHqC-MwiU9MPW4jMa5jg403RArZtwI2atIaQbE1cHW7eHrKSF-D8oZ_rInSilOssxONCGJa5Bhru55P-OAfw-rtBppG6sASEmg_iZbZdVaI3VdwZqNzgwlQzD7oltcIVMgxFY3HedDGDbuXhrR7gRtgytL-QP_Z5Rk-6kZIEKAdK4XwzuA595a7eZ6Y"/>
+</div>
+<div class="flex-grow min-w-0">
+<h3 class="font-body-md text-body-md font-bold truncate">เทย์เลอร์</h3>
+<div class="mt-2 flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary-fixed border border-on-background"></span>
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">กำลังเล่น</span>
+</div>
+</div>
+<button class="p-1 hover:bg-surface-variant rounded-md transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</article>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-background border-t-stroke-weight-thick border-on-background">
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary active:scale-95 transition-transform gap-1" href="#">
+<span class="material-symbols-outlined">sports_tennis</span>
+<span class="font-label-sm text-label-sm uppercase">COURTS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary active:scale-95 transition-transform gap-1" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-sm text-label-sm uppercase">MATCHES</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl border-stroke-weight-thin border-on-background px-4 py-1 translate-y-[-4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-transform gap-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm uppercase">PLAYERS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:text-primary active:scale-95 transition-transform gap-1" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="font-label-sm text-label-sm uppercase">LEADER</span>
+</a>
+</nav>
+</body></html>
