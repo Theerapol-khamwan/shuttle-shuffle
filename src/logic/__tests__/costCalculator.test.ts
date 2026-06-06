@@ -17,9 +17,9 @@ describe('Cost Calculator Logic', () => {
   };
 
   const mockPlayers: Player[] = [
-    { id: 'p1', session_id: 'session-1', name: 'Player 1', games_played: 4, exclude_from_split: false, is_paid: false },
-    { id: 'p2', session_id: 'session-1', name: 'Player 2', games_played: 2, exclude_from_split: false, is_paid: false },
-    { id: 'p3', session_id: 'session-1', name: 'Player 3', games_played: 3, exclude_from_split: false, is_paid: false }
+    { id: 'p1', session_id: 'session-1', name: 'Player 1', games_played: 4, exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+    { id: 'p2', session_id: 'session-1', name: 'Player 2', games_played: 2, exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+    { id: 'p3', session_id: 'session-1', name: 'Player 3', games_played: 3, exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" }
   ];
 
   describe('calculateSplits', () => {

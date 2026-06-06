@@ -74,7 +74,7 @@ describe('PlayerStore (Zustand)', () => {
         court_hourly_rate: 0, hours_played: 0, shuttle_unit_price: 0,
         shuttles_used: 0, cost_split_method: 'equal'
       },
-      players: [{ id: 'p1', name: 'A', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false }]
+      players: [{ id: 'p1', name: 'A', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" }]
     });
 
     await usePlayerStore.getState().removePlayer('p1');
@@ -99,14 +99,14 @@ describe('PlayerStore (Zustand)', () => {
         shuttles_used: 0, cost_split_method: 'equal'
       },
       players: [
-        { id: 'p1', name: 'P1', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p2', name: 'P2', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p3', name: 'P3', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p4', name: 'P4', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p5', name: 'P5', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p6', name: 'P6', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p7', name: 'P7', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p8', name: 'P8', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p1', name: 'P1', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+        { id: 'p2', name: 'P2', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+        { id: 'p3', name: 'P3', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+        { id: 'p4', name: 'P4', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+        { id: 'p5', name: 'P5', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+        { id: 'p6', name: 'P6', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+        { id: 'p7', name: 'P7', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
+        { id: 'p8', name: 'P8', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false, skill_level: 3, last_played_at: "" },
       ]
     });
 

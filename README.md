@@ -147,6 +147,12 @@ bunx expo start
 *   **Skill Level Tagging:** เพิ่มระดับฝีมือให้ผู้เล่น (เช่น Beginner, Intermediate, Advanced) 
 *   **Fair + Balanced Algorithm:** ปรับปรุงอัลกอริทึมให้คัดเลือกคนที่ "เกมน้อยที่สุด" ออกมากลุ่มหนึ่งก่อน จากนั้นทำการไขว้ทีมให้ค่าเฉลี่ยฝีมือ (Average Skill) ของทั้งสองฝั่งใกล้เคียงกันที่สุด เพื่อความสูสีและสนุกของเกม
 
+### ✅ Phase 9.2: Offline Remote Scoreboard (Local LAN Web Server)
+*   **Local LAN Server:** เครื่องของแอดมินจำลองตัวเองเป็น Web Server ขนาดย่อมๆ (ด้วย `expo-http-server`) เปิดแชร์จอคะแนนผ่านวง LAN/Wi-Fi เดียวกันโดยไม่ต้องใช้อินเทอร์เน็ต
+*   **QR Code Sharing:** สร้าง QR Code พร้อม URL ทันที เพื่อให้เพื่อนในก๊วนเอามือถือสแกนดูคะแนนแบบสดๆ จากเบราว์เซอร์
+*   **Bi-directional Sync (Polling):** ฝั่งเว็บใช้ระบบ Polling เพื่อซิงค์คะแนนให้ตรงกับแอปหลักแบบเกือบ Real-time และอนุญาตให้แตะที่หน้าเว็บเพื่อบวก/ลบคะแนนส่งกลับมาที่เครื่องแอดมินได้
+*   **Expo Go Fallback Protection:** ป้องกันแอปแครชด้วยการโหลด Native Module แบบเงื่อนไข ให้แอปส่วนใหญ่ยังสามารถเทสและรันด้วย Expo Go ได้ตามปกติ
+
 ---
 
 ## ⚖️ Engineering Standards (มาตรฐานการพัฒนา)

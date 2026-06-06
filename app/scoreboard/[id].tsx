@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -14,8 +14,10 @@ import { checkWinner, isGamePoint, getServiceSide } from '../../src/logic/scoreb
 import { colors } from '../../src/ui/tokens/colors';
 import { spacing, borderRadius } from '../../src/ui/tokens/spacing';
 import { NeoText, NeoButton, NeoIcon } from '../../src/ui/atoms';
-import { ScorePanel, AppBar } from '../../src/ui/organisms';
+import { ScorePanel, AppBar, ShareScoreboardModal } from '../../src/ui/organisms';
 import { ScoreboardTemplate } from '../../src/ui/templates';
+import { useKeepAwake } from 'expo-keep-awake';
+import { useLanServer } from '../../src/hooks/useLanServer';
 
 export default function Scoreboard() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -24,6 +26,9 @@ export default function Scoreboard() {
   const { activeMatches, players, currentSession, updateScore, completeMatch } = usePlayerStore();
   const { width, height } = useWindowDimensions();
   
+  // Prevent the screen from sleeping while on the Scoreboard
+  useKeepAwake();
+  
   const match = activeMatches.find(m => m.id === id);
   
   const [scoreA, setScoreA] = useState(match?.team_a_score || 0);
@@ -31,6 +36,10 @@ export default function Scoreboard() {
   const [servingTeam, setServingTeam] = useState<'A' | 'B'>('A');
   const [showControls, setShowControls] = useState(false);
   const [isSwapped, setIsSwapped] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+
+  // LAN Server hook สำหรับ broadcast คะแนนไปยังเว็บ
+  const { running: serverRunning, broadcastMatch } = useLanServer();
 
   const isLandscape = width > height;
   const winningScore = currentSession?.winning_score || 21;
@@ -62,7 +71,7 @@ export default function Scoreboard() {
   const isGamePointA = isGamePoint(scoreA, scoreB, rules);
   const isGamePointB = isGamePoint(scoreB, scoreA, rules);
 
-  const handleScoreChange = async (team: 'A' | 'B', delta: number) => {
+  const handleScoreChange = useCallback(async (team: 'A' | 'B', delta: number) => {
     let newA = scoreA;
     let newB = scoreB;
 
@@ -78,6 +87,11 @@ export default function Scoreboard() {
 
     await updateScore(id, newA, newB);
 
+    // Broadcast ไปยัง web clients ถ้า server กำลังทำงาน
+    if (serverRunning) {
+      broadcastMatch(id);
+    }
+
     const winner = checkWinner(newA, newB, rules);
     if (winner && delta > 0) {
       Alert.alert(
@@ -86,7 +100,7 @@ export default function Scoreboard() {
         [{ text: 'ตกลง' }]
       );
     }
-  };
+  }, [scoreA, scoreB, id, updateScore, serverRunning, broadcastMatch, rules]);
 
   const handleFinishMatch = () => {
     Alert.alert(
@@ -175,7 +189,7 @@ export default function Scoreboard() {
 
             <View style={styles.modalBody}>
               <NeoButton
-                variant="secondary"
+                variant="ghost"
                 title="🔄 สลับผู้เสิร์ฟ"
                 onPress={() => {
                   setServingTeam(servingTeam === 'A' ? 'B' : 'A');
@@ -185,11 +199,23 @@ export default function Scoreboard() {
                 style={styles.modalBtn}
               />
               <NeoButton
-                variant="secondary"
+                variant="ghost"
                 title="🔁 สลับฝั่งคอร์ต"
                 onPress={() => {
                   setIsSwapped(!isSwapped);
                   setShowControls(false);
+                }}
+                fullWidth
+                style={styles.modalBtn}
+              />
+              {/* ── แชร์จอคะแนน ── */}
+              <NeoButton
+                variant="primary"
+                title={serverRunning ? '📡 จัดการจอคะแนน LIVE' : '📡 แชร์จอคะแนน'}
+                backgroundColor={serverRunning ? colors.primaryContainer : colors.secondaryContainer}
+                onPress={() => {
+                  setShowControls(false);
+                  setShowShare(true);
                 }}
                 fullWidth
                 style={styles.modalBtn}
@@ -220,6 +246,13 @@ export default function Scoreboard() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      {/* Share Scoreboard Bottom Sheet */}
+      <ShareScoreboardModal
+        visible={showShare}
+        matchId={id}
+        onClose={() => setShowShare(false)}
+      />
     </ScoreboardTemplate>
   );
 }

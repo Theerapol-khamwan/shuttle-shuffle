@@ -29,7 +29,21 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          },
+          "ios": {
+            "infoPlist": {
+              "NSLocalNetworkUsageDescription": "ShuttleShuffle ต้องเข้าถึงเครือข่ายท้องถิ่นเพื่อแชร์จอคะแนนกับเพื่อนร่วมก๊วน",
+              "NSAllowsArbitraryLoads": true
+            }
+          }
+        }
+      ]
     ],
     "extra": {
       "router": {},

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Pressable, ViewStyle } from 'react-native';
+import { View, StyleSheet, Pressable, ViewStyle, StyleProp } from 'react-native';
 import { colors } from '../tokens/colors';
 import { spacing } from '../tokens/spacing';
 import { NeoText, NeoIcon } from '../atoms';
@@ -10,7 +10,7 @@ export interface AppBarProps {
   leftIcon?: string;
   onRightPress?: () => void;
   rightIcon?: string;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export default function AppBar({

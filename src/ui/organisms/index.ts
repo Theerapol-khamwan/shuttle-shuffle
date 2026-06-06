@@ -21,4 +21,5 @@ export * from './SettingsModal';
 
 export { default as PlayerRankingList } from './PlayerRankingList';
 export * from './PlayerRankingList';
-export * from './PlayerRankingList';
+
+export { default as ShareScoreboardModal } from './ShareScoreboardModal';
