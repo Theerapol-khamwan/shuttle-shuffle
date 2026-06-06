@@ -1,0 +1,48 @@
+{
+  "id": "13d6f315-11c4-4e17-91b7-4e8a5eabf56c",
+  "status": "ERRORED",
+  "platform": "ANDROID",
+  "error": {
+    "errorCode": "EAS_BUILD_UNKNOWN_GRADLE_ERROR",
+    "message": "Gradle build failed with unknown error. See logs for the \"Run gradlew\" phase for more information."
+  },
+  "artifacts": {},
+  "fingerprint": {
+    "id": "019e9dac-ffda-7078-95a6-8feb1c837e74",
+    "hash": "440362067df32aba253e78f0c48f8f16ce19a49b"
+  },
+  "initiatingActor": {
+    "id": "dae1872e-3021-4325-a92b-fc1a1da7d6e3",
+    "displayName": "koog-keng"
+  },
+  "logFiles": [
+    "https://storage.googleapis.com/eas-workflows-production/logs/0b4e24ff-fcaf-4f19-b4cf-e64af2f940d3/13d6f315-11c4-4e17-91b7-4e8a5eabf56c/2026-06-06T16%3A03%3A46Z-45789f6e-da98-4354-bf9c-5395db5e0e3e.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260606%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260606T160745Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=373c81981b3852392e2375f4ae1bc161d23b34abea1f3ee3614798133a1cc13c71fafc5235ae1d06f95e7f00b9ba3d603664dfa88e5ed3b42c8d428502502cbcaa1572e7c4d0274ef418c28fafb2f76ae830f93468de52ac2a11d54814c0ca0f9e01249c6dc71ccdf21b70ae286985957884e99f1202842109dd480aaa8690b5a6c2e32288da6c98845f3bb0eae256ec8119e4b88f91c328cee23f5b4526ef103b8f298f390c4c67df0cdbde78c0674b125b877f9b207506bc03531599b4a563f7cf988e7001a4adf58fde32cd47ada380751785e193cb537a8d43d4c4bdeda5e6ef8cbf128240960c3120415ded24244c08377967f9c8a87442db817d620e39"
+  ],
+  "project": {
+    "id": "0b4e24ff-fcaf-4f19-b4cf-e64af2f940d3",
+    "name": "Shuttle-Shuffle",
+    "slug": "Shuttle-Shuffle",
+    "ownerAccount": {
+      "id": "2da8c519-0e60-4002-92ed-d40a4b1678e0",
+      "name": "koog-keng"
+    }
+  },
+  "distribution": "STORE",
+  "buildProfile": "preview",
+  "sdkVersion": "54.0.0",
+  "appVersion": "1.0.0",
+  "appBuildVersion": "1",
+  "gitCommitHash": "ba7d4c61a9df06a7dc668d6680d8ae08f08fa62d",
+  "gitCommitMessage": "feat(scoreboard): Phase 9.2 Offline Remote Scoreboard via LAN Server",
+  "priority": "NORMAL",
+  "createdAt": "2026-06-06T16:03:41.111Z",
+  "updatedAt": "2026-06-06T16:10:20.380Z",
+  "completedAt": "2026-06-06T16:10:20.176Z",
+  "expirationDate": "2026-07-06T16:03:41.142Z",
+  "isForIosSimulator": false,
+  "metrics": {
+    "buildWaitTime": 1950,
+    "buildQueueTime": 7765,
+    "buildDuration": 389350
+  }
+}

@@ -194,7 +194,7 @@ const registerAllRoutes = () => {
   HttpServer.route('/scoreboard', 'GET', async (req: RequestEvent) => {
     // ดึง matchId จาก query param หรือ path
     const params = req.paramsJson ? JSON.parse(req.paramsJson) : {};
-    const matchId = params.id || extractPathSegment(req.path, 2);
+    const matchId = params.id || extractPathSegment(req.path, 1);
     if (!matchId) {
       return { statusCode: 400, contentType: 'text/plain', body: 'matchId required' };
     }

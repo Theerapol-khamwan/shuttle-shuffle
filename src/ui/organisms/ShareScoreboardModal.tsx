@@ -20,7 +20,6 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  Image,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,7 +27,7 @@ import { colors } from '../tokens/colors';
 import { spacing, borderRadius } from '../tokens/spacing';
 import { NeoText, NeoButton, NeoIcon, NeoBadge } from '../atoms';
 import { useLanServer } from '../../hooks/useLanServer';
-import { useQRCode } from '../../hooks/useQRCode';
+import QRCode from 'react-native-qrcode-svg';
 
 // ────────────────────────────────────────────────────────────
 // Types
@@ -60,7 +59,7 @@ export default function ShareScoreboardModal({
   } = useLanServer();
 
   const matchUrl = running ? getMatchUrl(matchId) : null;
-  const { dataUri: qrDataUri, loading: qrLoading } = useQRCode(matchUrl);
+
 
   const handleCopyUrl = useCallback(async () => {
     if (!matchUrl) return;
@@ -149,22 +148,16 @@ export default function ShareScoreboardModal({
             {/* QR Code Area */}
             {running && (
               <View style={styles.qrSection}>
-                {qrLoading && (
-                  <View style={styles.qrPlaceholder}>
-                    <ActivityIndicator size="large" color={colors.primary} />
-                    <NeoText variant="bodySm" style={styles.qrLoadingText}>
-                      กำลังสร้าง QR Code...
-                    </NeoText>
-                  </View>
-                )}
-
-                {!qrLoading && qrDataUri && (
+                {matchUrl && (
                   <View style={styles.qrContainer}>
-                    <Image
-                      source={{ uri: qrDataUri }}
-                      style={styles.qrImage}
-                      resizeMode="contain"
-                    />
+                    <View style={styles.qrImageWrapper}>
+                      <QRCode
+                        value={matchUrl}
+                        size={240}
+                        color={colors.onBackground}
+                        backgroundColor={colors.background}
+                      />
+                    </View>
                     <NeoText variant="labelSm" style={styles.qrCaption}>
                       เปิดกล้องสแกนเพื่อดูจอคะแนน
                     </NeoText>
@@ -351,9 +344,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  qrImage: {
-    width: 240,
-    height: 240,
+  qrImageWrapper: {
+    padding: spacing.sm,
+    backgroundColor: colors.background,
     borderWidth: spacing.strokeThick,
     borderColor: colors.onBackground,
     borderRadius: borderRadius.md,
