@@ -47,14 +47,19 @@ export const initDatabase = async () => {
           session_id TEXT NOT NULL,
           name TEXT NOT NULL,
           games_played INTEGER DEFAULT 0,
+          skill_level INTEGER DEFAULT 2,
           exclude_from_split INTEGER DEFAULT 0,
           is_paid INTEGER DEFAULT 0,
+          last_played_at TEXT DEFAULT '',
           FOREIGN KEY (session_id) REFERENCES sessions (id) ON DELETE CASCADE
         );
       `);
 
+      try { await db.execAsync('ALTER TABLE players ADD COLUMN skill_level INTEGER DEFAULT 2;'); } catch (e) {}
       try { await db.execAsync('ALTER TABLE players ADD COLUMN exclude_from_split INTEGER DEFAULT 0;'); } catch (e) {}
       try { await db.execAsync('ALTER TABLE players ADD COLUMN is_paid INTEGER DEFAULT 0;'); } catch (e) {}
+      try { await db.execAsync("ALTER TABLE players ADD COLUMN last_played_at TEXT DEFAULT '';"); } catch (e) {}
+
 
 
       await db.execAsync(`

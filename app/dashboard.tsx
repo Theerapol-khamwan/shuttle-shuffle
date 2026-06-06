@@ -92,7 +92,15 @@ export default function Dashboard() {
 
   const waitingPlayers = players
     .filter(p => !activePlayerIds.has(p.id))
-    .sort((a, b) => a.games_played - b.games_played);
+    .sort((a, b) => {
+      if (a.games_played !== b.games_played) {
+        return a.games_played - b.games_played;
+      }
+      // Longest wait time gets priority
+      const aTime = a.last_played_at ? new Date(a.last_played_at).getTime() : 0;
+      const bTime = b.last_played_at ? new Date(b.last_played_at).getTime() : 0;
+      return aTime - bTime;
+    });
 
   // ป้องกันค่า total_courts มากเกินไปจน Array.from() พัง (จำกัดสูงสุด 20 สนาม)
   const safeTotalCourts = Math.min(20, Math.max(1, Math.floor(Number(currentSession?.total_courts) || 1)));
@@ -161,9 +169,30 @@ export default function Dashboard() {
 
       {/* Active Courts Section */}
       <View style={styles.courtsSection}>
-        <NeoText variant="headlineMd" style={styles.sectionTitle}>
-          🏸 สนามแข่งขัน ({safeTotalCourts} สนาม)
-        </NeoText>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm }}>
+          <NeoText variant="headlineMd" style={styles.sectionTitle}>
+            🏸 สนามแข่งขัน
+          </NeoText>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <NeoButton 
+              size="sm" 
+              variant="ghost" 
+              title="-" 
+              onPress={() => handleSaveSettings(currentSession?.winning_score.toString() || '21', currentSession?.enable_deuce ?? true, Math.max(1, safeTotalCourts - 1).toString())} 
+              style={{ minWidth: 40 }}
+            />
+            <NeoText variant="bodyBold" style={{ marginHorizontal: spacing.sm, fontSize: 18 }}>
+              {safeTotalCourts} สนาม
+            </NeoText>
+            <NeoButton 
+              size="sm" 
+              variant="ghost" 
+              title="+" 
+              onPress={() => handleSaveSettings(currentSession?.winning_score.toString() || '21', currentSession?.enable_deuce ?? true, Math.min(20, safeTotalCourts + 1).toString())}
+              style={{ minWidth: 40 }}
+            />
+          </View>
+        </View>
         
         {Array.from({ length: safeTotalCourts }, (_, i) => i + 1).map((courtNum) => {
           const courtMatches = activeMatches.filter(m => m.court_number === courtNum);

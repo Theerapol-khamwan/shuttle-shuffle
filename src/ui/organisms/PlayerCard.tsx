@@ -7,7 +7,9 @@ import { NeoText, NeoIcon, NeoBadge } from '../atoms';
 export interface PlayerCardProps {
   name: string;
   gamesPlayed: number;
+  skillLevel?: number;
   onDelete?: () => void;
+  onChangeSkill?: () => void;
   status?: 'playing' | 'waiting' | 'resting';
   style?: ViewStyle;
 }
@@ -15,7 +17,9 @@ export interface PlayerCardProps {
 export default function PlayerCard({
   name,
   gamesPlayed,
+  skillLevel,
   onDelete,
+  onChangeSkill,
   status = 'waiting',
   style,
 }: PlayerCardProps) {
@@ -76,6 +80,14 @@ export default function PlayerCard({
         </NeoText>
         <View style={styles.statusRow}>
           <NeoBadge variant={badgeVariant} label={badgeLabel} />
+          {skillLevel !== undefined && (
+            <Pressable onPress={onChangeSkill}>
+              <NeoBadge 
+                variant="level" 
+                label={skillLevel === 1 ? 'Beginner' : skillLevel === 3 ? 'Advanced' : 'Intermediate'} 
+              />
+            </Pressable>
+          )}
           <NeoText variant="bodySm" color={colors.outline} style={styles.gamesText}>
             เล่นแล้ว: {gamesPlayed} เกม
           </NeoText>
@@ -141,9 +153,11 @@ const styles = StyleSheet.create({
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: 4,
   },
   gamesText: {
-    marginLeft: spacing.sm,
     fontSize: 12,
   },
   deleteButton: {
@@ -153,6 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
+    flexShrink: 0,
     borderColor: colors.onBackground,
     backgroundColor: colors.tertiaryContainer, // light pink
     shadowColor: colors.onBackground,

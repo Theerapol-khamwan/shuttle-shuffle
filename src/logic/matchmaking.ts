@@ -73,12 +73,21 @@ export const generateMatch = (
   };
 
   const scoredCombos = combinations.map(combo => {
+    const teamASkill = (combo.team_a[0].skill_level ?? 2) + (combo.team_a[1]!.skill_level ?? 2);
+    const teamBSkill = (combo.team_b[0].skill_level ?? 2) + (combo.team_b[1]!.skill_level ?? 2);
+    const skillDiff = Math.abs(teamASkill - teamBSkill);
+
     const pScore = getPartnerCount(combo.team_a[0].id, combo.team_a[1]!.id) +
                    getPartnerCount(combo.team_b[0].id, combo.team_b[1]!.id);
-    return { ...combo, pScore };
+    return { ...combo, skillDiff, pScore };
   });
 
-  scoredCombos.sort((a, b) => a.pScore - b.pScore);
+  scoredCombos.sort((a, b) => {
+    if (a.skillDiff !== b.skillDiff) {
+      return a.skillDiff - b.skillDiff;
+    }
+    return a.pScore - b.pScore;
+  });
   const best = scoredCombos[0];
 
   return {

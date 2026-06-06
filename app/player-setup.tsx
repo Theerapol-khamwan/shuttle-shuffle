@@ -3,7 +3,8 @@ import {
   StyleSheet, 
   View, 
   Alert,
-  FlatList
+  FlatList,
+  Pressable
 } from 'react-native';
 import { usePlayerStore } from '../src/store/usePlayerStore';
 import { useRouter } from 'expo-router';
@@ -15,13 +16,15 @@ import { ScreenTemplate } from '../src/ui/templates';
 
 export default function PlayerSetup() {
   const [name, setName] = useState('');
+  const [skillLevel, setSkillLevel] = useState<number>(2);
   const { 
     players, 
     startNewSession, 
     addPlayer, 
     removePlayer,
     clearAllPlayers,
-    loadCurrentSession 
+    loadCurrentSession,
+    updatePlayerSkill
   } = usePlayerStore();
   const router = useRouter();
 
@@ -37,8 +40,14 @@ export default function PlayerSetup() {
 
   const handleAddPlayer = async () => {
     if (name.trim().length === 0) return;
-    await addPlayer(name.trim());
+    await addPlayer(name.trim(), skillLevel);
     setName('');
+    setSkillLevel(2);
+  };
+  
+  const handleSkillChange = (id: string, currentSkill: number) => {
+    const nextSkill = currentSkill >= 3 ? 1 : currentSkill + 1;
+    updatePlayerSkill(id, nextSkill);
   };
 
   const handleRemovePlayer = (id: string, playerName: string) => {
@@ -89,20 +98,35 @@ export default function PlayerSetup() {
       </View>
       
       {/* Input Container */}
-      <View style={styles.inputContainer}>
-        <NeoInput
-          placeholder="ระบุชื่อผู้เล่น"
-          value={name}
-          onChangeText={setName}
-          onSubmitEditing={handleAddPlayer}
-          style={styles.input}
-        />
-        <NeoButton
-          variant="primary"
-          title="เพิ่ม"
-          onPress={handleAddPlayer}
-          style={styles.addBtn}
-        />
+      <View style={styles.inputWrapper}>
+        <View style={styles.inputRow}>
+          <NeoInput
+            placeholder="ระบุชื่อผู้เล่น"
+            value={name}
+            onChangeText={setName}
+            onSubmitEditing={handleAddPlayer}
+            style={styles.input}
+          />
+          <NeoButton
+            variant="primary"
+            title="เพิ่ม"
+            onPress={handleAddPlayer}
+            style={styles.addBtn}
+          />
+        </View>
+        <View style={styles.skillSelector}>
+          {[1, 2, 3].map(level => (
+            <Pressable 
+              key={level} 
+              style={[styles.skillBtn, skillLevel === level && styles.skillBtnActive]}
+              onPress={() => setSkillLevel(level)}
+            >
+              <NeoText variant="bodySm" style={skillLevel === level ? styles.skillTextActive : undefined}>
+                {level === 1 ? 'Beginner' : level === 3 ? 'Advanced' : 'Intermediate'}
+              </NeoText>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       {/* Roster List */}
@@ -113,6 +137,8 @@ export default function PlayerSetup() {
           <PlayerCard
             name={item.name}
             gamesPlayed={item.games_played}
+            skillLevel={item.skill_level}
+            onChangeSkill={() => handleSkillChange(item.id, item.skill_level)}
             onDelete={() => handleRemovePlayer(item.id, item.name)}
             status="waiting"
           />
@@ -161,11 +187,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  inputWrapper: {
     marginBottom: spacing.md,
     width: '100%',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
   },
   input: {
     flex: 1,
@@ -174,6 +203,26 @@ const styles = StyleSheet.create({
   addBtn: {
     height: 48,
     minHeight: 48,
+  },
+  skillSelector: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  skillBtn: {
+    flex: 1,
+    paddingVertical: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.outline,
+    borderRadius: 4,
+    alignItems: 'center',
+  },
+  skillBtnActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  skillTextActive: {
+    color: colors.onPrimary,
+    fontWeight: 'bold',
   },
   list: {
     flex: 1,

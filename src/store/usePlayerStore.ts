@@ -9,8 +9,10 @@ export interface Player {
   session_id: string;
   name: string;
   games_played: number;
+  skill_level: number;
   exclude_from_split: boolean;
   is_paid: boolean;
+  last_played_at: string;
 }
 
 export interface Session {
@@ -50,7 +52,7 @@ interface PlayerStore {
   startNewSession: () => Promise<void>;
   loadCurrentSession: () => Promise<void>;
   updateSessionSettings: (winningScore: number, enableDeuce: boolean, totalCourts: number) => Promise<void>;
-  addPlayer: (name: string) => Promise<void>;
+  addPlayer: (name: string, skill_level?: number) => Promise<void>;
   removePlayer: (id: string) => Promise<void>;
   clearAllPlayers: () => Promise<void>;
   loadPlayers: (sessionId: string) => Promise<void>;
@@ -72,6 +74,7 @@ interface PlayerStore {
   ) => Promise<void>;
   togglePlayerExclude: (id: string) => Promise<void>;
   togglePlayerPaid: (id: string) => Promise<void>;
+  updatePlayerSkill: (id: string, skill_level: number) => Promise<void>;
 }
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
@@ -172,15 +175,15 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     set({ players: mappedPlayers });
   },
 
-  addPlayer: async (name: string) => {
+  addPlayer: async (name: string, skill_level: number = 2) => {
     const { currentSession } = get();
     if (!currentSession) return;
 
     const db = await getDb();
     const id = uuidv4();
     await db.runAsync(
-      'INSERT INTO players (id, session_id, name, games_played, exclude_from_split, is_paid) VALUES (?, ?, ?, ?, ?, ?)',
-      [id, currentSession.id, name, 0, 0, 0]
+      'INSERT INTO players (id, session_id, name, games_played, skill_level, exclude_from_split, is_paid, last_played_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [id, currentSession.id, name, 0, skill_level, 0, 0, ""]
     );
     await get().loadPlayers(currentSession.id);
   },
@@ -386,11 +389,28 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   completeMatch: async (id: string, scoreA: number, scoreB: number) => {
     const db = await getDb();
+    
+    // First find the match to update last_played_at for the players
+    const match = await db.getFirstAsync<Match>('SELECT * FROM matches WHERE id = ?', [id]);
+    if (match) {
+      const now = new Date().toISOString();
+      const pids = [match.team_a_p1, match.team_a_p2, match.team_b_p1, match.team_b_p2].filter(Boolean) as string[];
+      for (const pid of pids) {
+        await db.runAsync('UPDATE players SET last_played_at = ? WHERE id = ?', [now, pid]);
+      }
+    }
+
     await db.runAsync(
       "UPDATE matches SET team_a_score = ?, team_b_score = ?, status = 'completed' WHERE id = ?",
       [scoreA, scoreB, id]
     );
     await get().loadActiveMatches();
+    
+    // Reload players to reflect last_played_at changes
+    const { currentSession } = get();
+    if (currentSession) {
+      await get().loadPlayers(currentSession.id);
+    }
   },
 
   endSession: async () => {
@@ -471,6 +491,19 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     await db.runAsync(
       'UPDATE players SET is_paid = ? WHERE id = ?',
       [newValue ? 1 : 0, id]
+    );
+
+    await get().loadPlayers(currentSession.id);
+  },
+
+  updatePlayerSkill: async (id: string, skill_level: number) => {
+    const { currentSession } = get();
+    if (!currentSession) return;
+
+    const db = await getDb();
+    await db.runAsync(
+      'UPDATE players SET skill_level = ? WHERE id = ?',
+      [skill_level, id]
     );
 
     await get().loadPlayers(currentSession.id);

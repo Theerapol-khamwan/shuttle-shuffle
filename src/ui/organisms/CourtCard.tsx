@@ -150,7 +150,8 @@ const styles = StyleSheet.create({
   vsContainer: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    marginVertical: spacing.md,
+    marginTop: spacing.md,
+    marginBottom: spacing.xl, // Increased margin to accommodate absolute badges
     minHeight: 100,
     position: 'relative',
   },

@@ -95,13 +95,13 @@
 <h3>การติดตั้ง (Installation)</h3>
 <ol>
 <li>Clone โปรเจกต์ลงเครื่อง</li>
-<li>รันคำสั่งติดตั้ง dependencies:<pre><code class="language-bash">npm install
+<li>รันคำสั่งติดตั้ง dependencies:<pre><code class="language-bash">bun install
 </code></pre>
 </li>
 </ol>
 <h3>การรันแอป (Usage)</h3>
 <p>ใช้คำสั่งนี้เพื่อเปิดหน้า Development:</p>
-<pre><code class="language-bash">npx expo start
+<pre><code class="language-bash">bunx expo start
 </code></pre>
 <ul>
 <li><strong>สแกน QR Code</strong> ผ่านแอป <strong>Expo Go</strong> บนมือถือเพื่อทดสอบบนเครื่องจริง (แนะนำ)</li>
@@ -160,6 +160,21 @@
 <li><strong>Round-Based Bulk Generation:</strong> ระบบสุ่มล่วงหน้า (<code>bulkMatchGeneration</code>) สุ่มเป็นรอบ โดยใน 1 รอบจะกระจายแมตช์ไปยังทุกคอร์ตที่เปิดใช้งาน พร้อมกลไกป้องกันผู้เล่นคนเดิมลงเล่นหลายสนามในเวลาเดียวกัน (Overlap Prevention)</li>
 <li><strong>Unit Tests:</strong> เขียน Unit Test ครอบคลุมกลไกสำคัญทั้งหมด รวมถึงการคำนวณราคาแบบหลายสนาม และการสุ่มแมตช์แยกคอร์ตใน <code>usePlayerStore</code></li>
 </ul>
+<h3>✅ Phase 8: UI Migration to Playful Neo-Brutalist Design (Atomic Design)</h3>
+<ul>
+<li><strong>Design Tokens System:</strong> สร้าง Design Token แบบเต็มรูปแบบ (colors, typography, spacing, shadows) ตามข้อกำหนดดีไซน์ Stitch</li>
+<li><strong>Atomic Design Architecture:</strong> จัดโครงสร้าง component แยกตามสถาปัตยกรรมอะตอม (Atoms, Molecules, Organisms, Templates)</li>
+<li><strong>Typography Loading:</strong> เพิ่มการโหลดฟอนต์ Google Fonts 4 ตัว (Bricolage Grotesque, Plus Jakarta Sans, Space Grotesk, Sarabun) ผ่าน expo-font พร้อมระบบจัดการ Splash Screen</li>
+<li><strong>Neo-Brutalist Visual Styles:</strong> ปรับแต่งองค์ประกอบดีไซน์ให้ใช้ขอบหนา 3px, เงาทึบไม่มีเบลอ 4px/8px, พื้นหลัง Dot Grid, และโทนสีหลักเป็น Electric Yellow (#d6ff00)</li>
+<li><strong>Complete Screen Refresh:</strong> อัปเดตและทำความสะอาด UI หน้าหลักทั้งหมด (หน้าแรก, จัดการผู้เล่น, แดชบอร์ดคอร์ต, กระดานคะแนนเสมือนจริง, สรุปผลลัพธ์ประจำวัน) ให้สวยงามมีชีวิตชีวาด้วย micro-animations แบบ spring</li>
+<li><strong>Edge-to-Edge Gestural Scoreboard:</strong> พัฒนกระดานคะแนน Match Live แบบ Colossal (ตัวเลขขนาดใหญ่พิเศษ 150/180px) ไร้ส่วนขยับเขยื้อนด้วย monospaced tabular numerals และตัด AppBar ออกเพื่อเพิ่มพื้นที่การแสดงผลสูงสุด พร้อมอัปเกรดระบบสัมผัสขยายคลุมทั่วแผ่นการ์ดคะแนนแบ่งสัดส่วน 50/50 (กดฝั่งซ้ายของกรอบเพื่อลดแต้ม -1, กดฝั่งขวาของกรอบเพื่อเพิ่มแต้ม +1 ได้อย่างลื่นไหลแม้อยู่ข้างสนาม)</li>
+<li><strong>Faded Floating Menu:</strong> จัดตำแหน่งปุ่มเปิดเมนูลอยแบบแฮมเบอร์เกอร์ไว้มุมขวาบน ปรับความจางลงเมื่อไม่ได้ใช้งาน (opacity 0.4) พร้อมหน้าต่างควบคุมลอยแบบดร็อปดาวน์ที่เข้ากับธีมแอปพลิเคชัน</li>
+</ul>
+<h3>⏳ Phase 9: Level-Based Matchmaking (ระบบสุ่มตามระดับฝีมือ)</h3>
+<ul>
+<li><strong>Skill Level Tagging:</strong> เพิ่มระดับฝีมือให้ผู้เล่น (เช่น Beginner, Intermediate, Advanced) </li>
+<li><strong>Fair + Balanced Algorithm:</strong> ปรับปรุงอัลกอริทึมให้คัดเลือกคนที่ &quot;เกมน้อยที่สุด&quot; ออกมากลุ่มหนึ่งก่อน จากนั้นทำการไขว้ทีมให้ค่าเฉลี่ยฝีมือ (Average Skill) ของทั้งสองฝั่งใกล้เคียงกันที่สุด เพื่อความสูสีและสนุกของเกม</li>
+</ul>
 <hr>
 <h2>⚖️ Engineering Standards (มาตรฐานการพัฒนา)</h2>
 <ol>
@@ -170,6 +185,7 @@
 <li><strong>The Rule of Cost Transparency:</strong> ระบบการหารค่าใช้จ่ายต้องชัดเจน ตรวจสอบทศนิยมการปัดเศษสตางค์อย่างรัดกุม (Rounding Error Handling) และห้ามให้เกิดการหารด้วยศูนย์ (Division by Zero Protection)</li>
 <li><strong>Mandatory Feature Testing Rule:</strong> ทุกครั้งที่มีการแก้ไขฟีเจอร์เดิม หรือเพิ่มฟีเจอร์ใหม่เข้ามาในระบบ <strong>ต้องทำการเขียนหรืออัปเดต Unit Test คู่กันเสมอ</strong> เพื่อยืนยันความถูกต้องและป้องกันไม่ให้โค้ดใหม่ทำให้ระบบหลุดจากความคาดหมายเดิม (Regression prevention)</li>
 </ol>
+
 
 </body>
 </html>

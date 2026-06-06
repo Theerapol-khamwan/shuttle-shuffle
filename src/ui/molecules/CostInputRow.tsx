@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TextInput, ViewStyle } from 'react-native';
 import { colors } from '../tokens/colors';
 import { spacing, borderRadius } from '../tokens/spacing';
-import { NeoText } from '../atoms';
+import { NeoText, NeoButton } from '../atoms';
 import { FONT_THAI } from '../tokens/typography';
 
 export interface CostInputRowProps {
@@ -12,6 +12,9 @@ export interface CostInputRowProps {
   placeholder?: string;
   unit?: string;
   style?: ViewStyle;
+  inputType?: 'keyboard' | 'stepper';
+  step?: number;
+  min?: number;
 }
 
 export default function CostInputRow({
@@ -21,7 +24,17 @@ export default function CostInputRow({
   placeholder = '0',
   unit = 'THB',
   style,
+  inputType = 'keyboard',
+  step = 1,
+  min = 0,
 }: CostInputRowProps) {
+  const handleStep = (delta: number) => {
+    const current = parseFloat(value) || 0;
+    // Handle floating point precision issues for steppers (e.g. 0.5 steps)
+    const next = Math.max(min, Math.round((current + delta) * 10) / 10);
+    onChangeText(next.toString());
+  };
+
   return (
     <View style={[styles.container, style]}>
       {/* Label */}
@@ -33,6 +46,15 @@ export default function CostInputRow({
 
       {/* Input + Unit */}
       <View style={styles.inputWrapper}>
+        {inputType === 'stepper' && (
+          <NeoButton 
+            variant="ghost" 
+            title="-" 
+            size="sm"
+            onPress={() => handleStep(-step)} 
+            style={styles.stepperBtn} 
+          />
+        )}
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -40,7 +62,17 @@ export default function CostInputRow({
           placeholderTextColor={colors.outline}
           keyboardType="numeric"
           style={styles.input}
+          editable={inputType === 'keyboard'}
         />
+        {inputType === 'stepper' && (
+          <NeoButton 
+            variant="ghost" 
+            title="+" 
+            size="sm"
+            onPress={() => handleStep(step)} 
+            style={styles.stepperBtn} 
+          />
+        )}
         {unit && (
           <NeoText variant="labelSm" color={colors.outline} style={styles.unitText}>
             {unit}
@@ -70,6 +102,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  stepperBtn: {
+    minWidth: 40,
+    marginHorizontal: 4,
+  },
   input: {
     borderWidth: 2,
     borderColor: colors.onBackground,
@@ -80,7 +116,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONT_THAI,
     color: colors.onBackground,
-    width: 90,
+    width: 60, // slightly narrower to fit steppers
     textAlign: 'center',
     fontWeight: 'bold',
   },

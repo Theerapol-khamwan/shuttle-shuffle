@@ -212,6 +212,8 @@ export default function Summary() {
             <CostInputRow
               label="จำนวนชั่วโมง (ชม.)"
               unit="ชั่วโมง"
+              inputType="stepper"
+              step={0.5}
               value={hoursPlayed}
               onChangeText={(val) => {
                 setHoursPlayed(val);
@@ -222,6 +224,9 @@ export default function Summary() {
             <CostInputRow
               label="จำนวนสนาม (สนาม)"
               unit="สนาม"
+              inputType="stepper"
+              step={1}
+              min={1}
               value={totalCourts}
               onChangeText={(val) => {
                 setTotalCourts(val);
@@ -242,6 +247,8 @@ export default function Summary() {
             <CostInputRow
               label="จำนวนลูกแบด (ลูก)"
               unit="ลูก"
+              inputType="stepper"
+              step={1}
               value={shuttlesUsed}
               onChangeText={(val) => {
                 setShuttlesUsed(val);
@@ -439,19 +446,22 @@ const styles = StyleSheet.create({
   },
   playerCostRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing.sm,
     borderBottomWidth: 1.5,
     borderStyle: 'dashed',
     borderColor: colors.outlineVariant,
+    gap: spacing.sm,
   },
   playerExcluded: {
     backgroundColor: colors.surfaceContainerLow,
     opacity: 0.6,
   },
   playerInfo: {
-    flex: 1.3,
+    flex: 1,
+    minWidth: 140,
   },
   playerNameText: {
     fontSize: 16,
@@ -465,10 +475,10 @@ const styles = StyleSheet.create({
     color: colors.outline,
   },
   actionsContainer: {
-    flex: 1.2,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
+    flexShrink: 0,
   },
   toggleGroup: {
     alignItems: 'center',

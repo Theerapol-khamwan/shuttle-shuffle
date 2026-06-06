@@ -3,12 +3,12 @@ import { Player } from '../../store/usePlayerStore';
 
 describe('Matchmaking Logic', () => {
   const mockPlayers: Player[] = [
-    { id: 'p1', name: 'A', games_played: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
-    { id: 'p2', name: 'B', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-    { id: 'p3', name: 'C', games_played: 1, session_id: 's1', exclude_from_split: false, is_paid: false },
-    { id: 'p4', name: 'D', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-    { id: 'p5', name: 'E', games_played: 0, session_id: 's1', exclude_from_split: false, is_paid: false },
-    { id: 'p6', name: 'F', games_played: 1, session_id: 's1', exclude_from_split: false, is_paid: false },
+    { id: 'p1', name: 'A', games_played: 2, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+    { id: 'p2', name: 'B', games_played: 0, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+    { id: 'p3', name: 'C', games_played: 1, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+    { id: 'p4', name: 'D', games_played: 0, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+    { id: 'p5', name: 'E', games_played: 0, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+    { id: 'p6', name: 'F', games_played: 1, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
   ];
 
   describe('Rule of Fairness (Least Games)', () => {
@@ -29,12 +29,12 @@ describe('Matchmaking Logic', () => {
     it('ไม่ควรเลือกคนที่เพิ่งเล่นจบในแมตช์ล่าสุด หากมีคนอื่นที่มีจำนวนเกมเท่ากันรออยู่', () => {
       // สมมติ p2, p4, p5, p3 เพิ่งเล่นแมตช์ล่าสุด (ทุกคนมี 1 เกมเท่ากันยกเว้น p1 มี 2 เกม)
       const players: Player[] = [
-        { id: 'p1', name: 'A', games_played: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p2', name: 'B', games_played: 1, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p3', name: 'C', games_played: 1, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p4', name: 'D', games_played: 1, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p5', name: 'E', games_played: 1, session_id: 's1', exclude_from_split: false, is_paid: false },
-        { id: 'p6', name: 'F', games_played: 1, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p1', name: 'A', games_played: 2, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p2', name: 'B', games_played: 1, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p3', name: 'C', games_played: 1, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p4', name: 'D', games_played: 1, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p5', name: 'E', games_played: 1, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
+        { id: 'p6', name: 'F', games_played: 1, skill_level: 2, session_id: 's1', exclude_from_split: false, is_paid: false },
       ];
 
 
@@ -65,6 +65,31 @@ describe('Matchmaking Logic', () => {
       const match = generateMatch(mockPlayers, [], 'doubles');
       expect(match!.team_a[1]).not.toBeNull();
       expect(match!.team_b[1]).not.toBeNull();
+    });
+  });
+
+  describe('Skill-Based Balancing', () => {
+    it('ควรจับคู่ให้ผลรวมระดับฝีมือของทั้งสองทีมใกล้เคียงกันที่สุด', () => {
+      const players: Player[] = [
+        { id: 'p1', name: 'A', games_played: 0, skill_level: 3, session_id: 's1', exclude_from_split: false, is_paid: false }, // Advanced
+        { id: 'p2', name: 'B', games_played: 0, skill_level: 3, session_id: 's1', exclude_from_split: false, is_paid: false }, // Advanced
+        { id: 'p3', name: 'C', games_played: 0, skill_level: 1, session_id: 's1', exclude_from_split: false, is_paid: false }, // Beginner
+        { id: 'p4', name: 'D', games_played: 0, skill_level: 1, session_id: 's1', exclude_from_split: false, is_paid: false }, // Beginner
+      ];
+
+      const match = generateMatch(players, [], 'doubles');
+      
+      const teamA = match!.team_a;
+      const teamB = match!.team_b;
+
+      const teamASkills = teamA.map(id => players.find(p => p.id === id)!.skill_level);
+      const teamBSkills = teamB.map(id => players.find(p => p.id === id)!.skill_level);
+
+      // คาดหวังการจับคู่ Advanced(3) + Beginner(1) ให้อยู่ทีมเดียวกันทั้งสองฝั่ง เพื่อให้สมดุล (4 แต้มเท่ากัน)
+      expect(teamASkills).toContain(3);
+      expect(teamASkills).toContain(1);
+      expect(teamBSkills).toContain(3);
+      expect(teamBSkills).toContain(1);
     });
   });
 });
