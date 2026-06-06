@@ -39,3 +39,11 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# AI Assistants and Agent Skills
+.agents/
+.claude/
+.impeccable/
+.gemini/
+.cursor/
+.aider/
