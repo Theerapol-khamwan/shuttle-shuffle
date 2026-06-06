@@ -47,3 +47,4 @@ yarn-error.*
 .gemini/
 .cursor/
 .aider/
+.antigravitycli/
