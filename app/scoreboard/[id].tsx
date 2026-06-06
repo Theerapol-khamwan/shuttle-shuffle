@@ -53,19 +53,7 @@ export default function Scoreboard() {
     }
   }, [match?.id]);
 
-  if (!match) {
-    return (
-      <View style={styles.center}>
-        <NeoText variant="bodyBold">ไม่พบข้อมูลแมตช์</NeoText>
-        <NeoButton
-          variant="primary"
-          title="กลับไปที่แดชบอร์ด"
-          onPress={() => router.back()}
-          style={styles.backBtnCenter}
-        />
-      </View>
-    );
-  }
+
 
   // Check Game Point
   const isGamePointA = isGamePoint(scoreA, scoreB, rules);
@@ -115,6 +103,20 @@ export default function Scoreboard() {
       ]
     );
   };
+
+  if (!match) {
+    return (
+      <View style={styles.center}>
+        <NeoText variant="bodyBold">ไม่พบข้อมูลแมตช์</NeoText>
+        <NeoButton
+          variant="primary"
+          title="กลับไปที่แดชบอร์ด"
+          onPress={() => router.back()}
+          style={styles.backBtnCenter}
+        />
+      </View>
+    );
+  }
 
   const getPlayerName = (pid: string) => {
     return players.find(p => p.id === pid)?.name || 'Unknown';
