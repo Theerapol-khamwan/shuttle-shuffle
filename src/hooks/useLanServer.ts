@@ -215,7 +215,7 @@ export const useLanServer = () => {
   const getMatchUrl = useCallback((matchId: string): string | null => {
     const base = getServerUrl();
     if (!base) return null;
-    return `${base}/scoreboard/${matchId}`;
+    return `${base}/scoreboard?id=${matchId}`;
   }, []);
 
   return {

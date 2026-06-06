@@ -194,7 +194,12 @@ const registerAllRoutes = () => {
   HttpServer.route('/scoreboard', 'GET', async (req: RequestEvent) => {
     // ดึง matchId จาก query param หรือ path
     const params = req.paramsJson ? JSON.parse(req.paramsJson) : {};
-    const matchId = params.id || extractPathSegment(req.path, 1);
+    let matchId = params.id;
+    if (!matchId) {
+      const queryMatch = req.path.match(/[?&]id=([^&]+)/);
+      if (queryMatch) matchId = queryMatch[1];
+    }
+    if (!matchId) matchId = extractPathSegment(req.path, 1);
     if (!matchId) {
       return { statusCode: 400, contentType: 'text/plain', body: 'matchId required' };
     }
@@ -213,7 +218,7 @@ const registerAllRoutes = () => {
       statusCode: 200,
       contentType: 'application/json; charset=utf-8',
       headers: CORS_HEADERS,
-      body: JSON.stringify(matches),
+      body: JSON.stringify(matches).replace(/[\u0080-\uFFFF]/g, c => '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4)),
     };
   });
 
@@ -222,8 +227,17 @@ const registerAllRoutes = () => {
   // Returns latest score if newer than `since` timestamp
   HttpServer.route('/api/poll', 'GET', async (req: RequestEvent) => {
     const params = req.paramsJson ? JSON.parse(req.paramsJson) : {};
-    const matchId = params.matchId as string;
-    const since = parseInt(params.since ?? '0', 10) || 0;
+    let matchId = params.matchId;
+    let since = parseInt(params.since ?? '0', 10) || 0;
+    
+    if (!matchId) {
+      const idMatch = req.path.match(/[?&]matchId=([^&]+)/);
+      if (idMatch) matchId = idMatch[1];
+    }
+    if (!since && req.path.includes('since=')) {
+      const sinceMatch = req.path.match(/[?&]since=([^&]+)/);
+      if (sinceMatch) since = parseInt(sinceMatch[1], 10) || 0;
+    }
 
     if (!matchId) {
       return {
@@ -242,7 +256,7 @@ const registerAllRoutes = () => {
         statusCode: 200,
         contentType: 'application/json; charset=utf-8',
         headers: CORS_HEADERS,
-        body: JSON.stringify({ ...cached, hasUpdate: true }),
+        body: JSON.stringify({ ...cached, hasUpdate: true }).replace(/[\u0080-\uFFFF]/g, c => '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4)),
       };
     }
 
@@ -254,7 +268,7 @@ const registerAllRoutes = () => {
         statusCode: 200,
         contentType: 'application/json; charset=utf-8',
         headers: CORS_HEADERS,
-        body: JSON.stringify(result),
+        body: JSON.stringify(result).replace(/[\u0080-\uFFFF]/g, c => '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4)),
       };
     }
 
@@ -278,7 +292,7 @@ const registerAllRoutes = () => {
           statusCode: 400,
           contentType: 'application/json',
           headers: CORS_HEADERS,
-          body: JSON.stringify({ error: 'matchId, team (A|B), delta required' }),
+          body: JSON.stringify({ error: 'matchId, team (A|B), delta required' }).replace(/[\u0080-\uFFFF]/g, c => '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4)),
         };
       }
 

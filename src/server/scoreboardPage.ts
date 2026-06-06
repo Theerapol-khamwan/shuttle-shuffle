@@ -6,7 +6,7 @@
  * เพราะ expo-http-server ไม่รองรับ streaming responses
  */
 
-export const getScoreboardPageHTML = (matchId: string): string => `<!DOCTYPE html>
+const rawScoreboardPageHTML = (matchId: string): string => `<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -406,5 +406,10 @@ export const getScoreboardPageHTML = (matchId: string): string => `<!DOCTYPE htm
 </script>
 </body>
 </html>`;
+
+export const getScoreboardPageHTML = (matchId: string): string => {
+  const html = rawScoreboardPageHTML(matchId);
+  return html.replace(/[\u0080-\uFFFF]/g, c => `&#${c.charCodeAt(0)};`);
+};
 
 export default getScoreboardPageHTML;
