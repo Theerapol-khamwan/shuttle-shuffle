@@ -22,7 +22,7 @@ export const getMatchListPageHTML = (matches: ActiveMatchInfo[]): string => {
         <p>รอให้แอดมินเพิ่มแมตช์ก่อนครับ</p>
       </div>`
     : matches.map(m => `
-      <a href="/scoreboard/${m.id}" class="match-card">
+      <a href="/scoreboard?id=${m.id}" class="match-card">
         <div class="court-badge">สนาม ${m.courtNumber}</div>
         <div class="match-teams">
           <div class="team-a">
