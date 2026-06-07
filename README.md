@@ -164,10 +164,12 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 
 วิธีนี้ใช้ระบบ EAS ของ Expo แต่ Build ที่เครื่องตัวเอง (ไม่ต้องส่งไป Cloud)
 
-#### 2.1 ติดตั้ง EAS CLI
+#### 2.1 ติดตั้ง EAS CLI และล็อกอิน
 ```bash
 bun add -g eas-cli
+eas login
 ```
+*(ถ้ามีเพื่อนในทีมที่จะช่วย Build ต้องให้พวกเขาล็อกอินด้วยบัญชี Expo ของตัวเอง และคุณต้องเชิญเขาเข้า Organization `starmolice` ก่อน)*
 
 #### 2.2 Build APK ที่เครื่อง
 ```bash
@@ -175,6 +177,7 @@ eas build --platform android --profile preview --local
 ```
 *   Profile `preview` ถูกตั้งค่าให้ Output เป็นไฟล์ `.apk` (ตามที่กำหนดใน `eas.json`)
 *   Flag `--local` หมายถึง Build ที่เครื่องตัวเอง ไม่ต้องส่งไป EAS Cloud
+*   โปรเจกต์นี้ผูกอยู่กับ Organization ชื่อ **starmolice** ทุกคนที่อยู่ในทีมจะสามารถรันคำสั่งนี้และช่วยกันพัฒนาได้
 
 #### 2.3 ไฟล์ APK จะถูกสร้างไว้ที่ Root ของโปรเจกต์
 ```
