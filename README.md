@@ -199,6 +199,26 @@ bunx expo run:android --variant release
 
 ---
 
+### วิธีที่ 4: Build ผ่าน EAS Cloud (Team Build) ☁️
+
+วิธีนี้เหมาะสำหรับให้ทีมช่วยกัน Build โดยไม่ต้องใช้เครื่องคอมพิวเตอร์ตัวเองประมวลผล (ระบบจะส่งโค้ดไป Build บน Cloud ของ Expo แทน) ทุกคนใน Organization สามารถเข้ามาช่วยกด Build หรือดาวน์โหลด APK จากเว็บได้เลย
+
+#### 4.1 ล็อกอินด้วยบัญชี Expo
+```bash
+eas login
+```
+*(ต้องเป็นสมาชิกของ Organization `starmolice`)*
+
+#### 4.2 สั่ง Build ขึ้น Cloud
+```bash
+eas build --platform android --profile preview
+```
+*   ไม่ต้องใส่ `--local`
+*   รอระบบทำงาน (ประมาณ 5-10 นาที) เมื่อเสร็จแล้วจะได้ Link สำหรับดาวน์โหลดไฟล์ `.apk` โดยตรง
+*   ทีมงานทุกคนสามารถเข้าไปดูสถานะการ Build และโหลด APK ย้อนหลังได้ที่ [expo.dev](https://expo.dev)
+
+---
+
 ### ❓ Troubleshooting (แก้ปัญหาที่พบบ่อย)
 
 | ปัญหา | วิธีแก้ |
