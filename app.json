@@ -2,6 +2,7 @@
   "expo": {
     "name": "Shuttle-Shuffle",
     "slug": "Shuttle-Shuffle",
+    "owner": "starmolice",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",

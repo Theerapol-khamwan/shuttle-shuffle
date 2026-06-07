@@ -104,6 +104,110 @@ bunx expo run:ios
 
 ---
 
+## 📦 Building APK (วิธี Build ไฟล์ .apk ที่เครื่อง)
+
+### สิ่งที่ต้องติดตั้งก่อน (Prerequisites)
+
+| เครื่องมือ | เวอร์ชันขั้นต่ำ | หมายเหตุ |
+|---|---|---|
+| **Node.js** | 18+ | แนะนำ LTS |
+| **Bun** | 1.x | ใช้แทน npm/yarn |
+| **Java JDK** | 17 | ตรวจสอบด้วย `java -version` |
+| **Android Studio** | Latest | ต้องติดตั้ง Android SDK, Build-Tools และ NDK |
+| **Android SDK** | API 35 (compileSdk) | ตั้งค่า `ANDROID_HOME` ให้ถูกต้อง |
+
+#### ตั้งค่า Environment Variables (macOS/Linux)
+เพิ่มบรรทัดเหล่านี้ใน `~/.zshrc` หรือ `~/.bashrc`:
+```bash
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+```
+จากนั้นรัน `source ~/.zshrc` เพื่อให้มีผล
+
+---
+
+### วิธีที่ 1: Build ผ่าน Gradle โดยตรง (แนะนำ ✅)
+
+วิธีนี้ใช้โฟลเดอร์ `android/` ที่ถูก prebuild ไว้แล้ว เหมาะสำหรับ **Debug APK** ที่ต้องการทดสอบบนเครื่องจริง
+
+#### 1.1 ติดตั้ง Dependencies
+```bash
+bun install
+```
+
+#### 1.2 Build Debug APK
+```bash
+cd android && ./gradlew assembleDebug
+```
+
+#### 1.3 ไฟล์ APK จะอยู่ที่
+```
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+#### 1.4 ติดตั้งลงมือถือ (เสียบสาย USB + เปิด USB Debugging)
+```bash
+adb install android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+> **💡 Tip:** หากต้องการ Build แบบ **Release APK** (ขนาดเล็กกว่า, เร็วกว่า) ให้ใช้:
+> ```bash
+> cd android && ./gradlew assembleRelease
+> ```
+> ไฟล์จะอยู่ที่ `android/app/build/outputs/apk/release/app-release.apk`
+> ⚠️ Release build ปัจจุบันใช้ `debug.keystore` ในการ Sign หากจะนำขึ้น Play Store ต้องสร้าง Keystore ของตัวเองก่อน
+
+---
+
+### วิธีที่ 2: Build ผ่าน EAS Build (Local)
+
+วิธีนี้ใช้ระบบ EAS ของ Expo แต่ Build ที่เครื่องตัวเอง (ไม่ต้องส่งไป Cloud)
+
+#### 2.1 ติดตั้ง EAS CLI
+```bash
+bun add -g eas-cli
+```
+
+#### 2.2 Build APK ที่เครื่อง
+```bash
+eas build --platform android --profile preview --local
+```
+*   Profile `preview` ถูกตั้งค่าให้ Output เป็นไฟล์ `.apk` (ตามที่กำหนดใน `eas.json`)
+*   Flag `--local` หมายถึง Build ที่เครื่องตัวเอง ไม่ต้องส่งไป EAS Cloud
+
+#### 2.3 ไฟล์ APK จะถูกสร้างไว้ที่ Root ของโปรเจกต์
+```
+./build-*.apk
+```
+
+---
+
+### วิธีที่ 3: Build ผ่าน expo run:android
+
+วิธีนี้เป็นการ Build พร้อมรันลงเครื่อง/Emulator โดยตรง (Development Build)
+
+```bash
+bunx expo run:android --variant release
+```
+*   ถ้าไม่ใส่ `--variant release` จะเป็น Debug build (Default)
+*   APK จะถูกติดตั้งลง Emulator/เครื่องจริงที่เชื่อมต่ออยู่โดยอัตโนมัติ
+*   ไฟล์ APK จะอยู่ใน `android/app/build/outputs/apk/` เช่นเดียวกับวิธีที่ 1
+
+---
+
+### ❓ Troubleshooting (แก้ปัญหาที่พบบ่อย)
+
+| ปัญหา | วิธีแก้ |
+|---|---|
+| `SDK location not found` | ตั้งค่า `ANDROID_HOME` ให้ถูกต้อง หรือสร้างไฟล์ `android/local.properties` พร้อมเนื้อหา `sdk.dir=/Users/<username>/Library/Android/sdk` |
+| `Could not determine java version` | ติดตั้ง JDK 17 และตรวจสอบด้วย `java -version` |
+| `Execution failed for task ':app:...'` | ลองล้าง Cache ด้วย `cd android && ./gradlew clean` แล้ว Build ใหม่ |
+| Build ช้ามาก | เพิ่ม RAM ให้ Gradle ใน `android/gradle.properties`: `org.gradle.jvmargs=-Xmx4096m` |
+| `adb: command not found` | เพิ่ม `$ANDROID_HOME/platform-tools` ใน PATH |
+
+---
+
 ## 📜 Development Roadmap (ประวัติการพัฒนา)
 
 ### ✅ Phase 1: Setup & Data Layer
