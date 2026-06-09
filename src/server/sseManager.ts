@@ -14,6 +14,7 @@ export interface ScoreUpdate {
   teamALabel: string;
   teamBLabel: string;
   servingTeam: 'A' | 'B';
+  serviceSide: 'LEFT' | 'RIGHT';
   isGamePointA: boolean;
   isGamePointB: boolean;
   timestamp: number;

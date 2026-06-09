@@ -18,7 +18,7 @@ import {
   broadcastScoreUpdate,
 } from '../server/lanServer';
 import { usePlayerStore } from '../store/usePlayerStore';
-import { isGamePoint } from '../logic/scoreboard';
+import { isGamePoint, getServiceSide } from '../logic/scoreboard';
 import type { ActiveMatchInfo } from '../server/matchListPage';
 import type { ScoreUpdate } from '../server/sseManager';
 
@@ -71,20 +71,23 @@ export const useLanServer = () => {
   }, [getPlayerName]);
 
   const buildScoreUpdate = useCallback((matchId: string): ScoreUpdate | null => {
-    const match = matchesRef.current.find(m => m.id === matchId);
+    // ใช้ getState() แทน matchesRef.current เพื่อให้ได้ข้อมูลล่าสุดทันที 
+    // โดยไม่ต้องรอ useEffect อัพเดท ref (แก้ปัญหา race condition เมื่อกดแต้ม)
+    const { activeMatches, currentSession } = usePlayerStore.getState();
+    const match = activeMatches.find(m => m.id === matchId);
     if (!match) return null;
 
-    const session = sessionRef.current;
-    const winningScore = session?.winning_score ?? 21;
-    const deuceEnabled = session?.enable_deuce ?? true;
-    const rules = { winningScore, deuceEnabled };
+    const rules = { 
+      winningScore: currentSession?.winning_score ?? 21, 
+      deuceEnabled: currentSession?.enable_deuce ?? true 
+    };
 
     const scoreA = match.team_a_score;
     const scoreB = match.team_b_score;
 
-    // Determine serving team from most recent score change
-    const servingTeam: 'A' | 'B' = scoreA >= scoreB ? 'A' : 'B';
-    const currentScore = servingTeam === 'A' ? scoreA : scoreB;
+    // Use persisted serving team if available, otherwise fallback
+    const servingTeam: 'A' | 'B' = match.serving_team || (scoreA >= scoreB ? 'A' : 'B');
+    const serviceSide = getServiceSide(servingTeam === 'A' ? scoreA : scoreB);
 
     return {
       matchId: match.id,
@@ -93,6 +96,7 @@ export const useLanServer = () => {
       teamALabel: buildTeamLabel(match.team_a_p1, match.team_a_p2),
       teamBLabel: buildTeamLabel(match.team_b_p1, match.team_b_p2),
       servingTeam,
+      serviceSide,
       isGamePointA: isGamePoint(scoreA, scoreB, rules),
       isGamePointB: isGamePoint(scoreB, scoreA, rules),
       timestamp: Date.now(),
@@ -106,7 +110,8 @@ export const useLanServer = () => {
     registerHandlers({
       // Handler สำหรับ reverse control (เว็บกดแต้ม → แอป)
       onScoreAction: async (matchId, team, delta) => {
-        const match = matchesRef.current.find(m => m.id === matchId);
+        const { activeMatches, players } = usePlayerStore.getState();
+        const match = activeMatches.find(m => m.id === matchId);
         if (!match) return;
 
         const newA = team === 'A'
@@ -115,9 +120,17 @@ export const useLanServer = () => {
         const newB = team === 'B'
           ? Math.max(0, match.team_b_score + delta)
           : match.team_b_score;
+        
+        // Determine serving team
+        let servingTeam: 'A' | 'B' = match.serving_team;
+        if (delta > 0) {
+          servingTeam = team;
+        }
+        
+        const serviceSide = getServiceSide(servingTeam === 'A' ? newA : newB);
 
         // อัพเดท store (จะ trigger broadcast จาก Scoreboard screen)
-        await updateScore(matchId, newA, newB);
+        await updateScore(matchId, newA, newB, servingTeam);
 
         // Broadcast ทันทีโดยไม่ต้องรอ store
         const update: ScoreUpdate = {
@@ -126,7 +139,8 @@ export const useLanServer = () => {
           scoreB: newB,
           teamALabel: buildTeamLabel(match.team_a_p1, match.team_a_p2),
           teamBLabel: buildTeamLabel(match.team_b_p1, match.team_b_p2),
-          servingTeam: team === 'A' && delta > 0 ? 'A' : team === 'B' && delta > 0 ? 'B' : 'A',
+          servingTeam,
+          serviceSide,
           isGamePointA: false,
           isGamePointB: false,
           timestamp: Date.now(),
@@ -136,7 +150,8 @@ export const useLanServer = () => {
 
       // Handler สำหรับ match list page
       getMatches: (): ActiveMatchInfo[] => {
-        return matchesRef.current.map(m => ({
+        const { activeMatches } = usePlayerStore.getState();
+        return activeMatches.map(m => ({
           id: m.id,
           courtNumber: m.court_number,
           teamALabel: buildTeamLabel(m.team_a_p1, m.team_a_p2),
@@ -147,9 +162,38 @@ export const useLanServer = () => {
       },
 
       // Handler สำหรับ initial SSE state
-      getMatchScore: (matchId: string) => buildScoreUpdate(matchId),
+      getMatchScore: (matchId: string) => {
+        // Use getState() to ensure we always have the latest matches even if unmounted
+        const { activeMatches, currentSession } = usePlayerStore.getState();
+        const match = activeMatches.find(m => m.id === matchId);
+        if (!match) return null;
+
+        const winningScore = currentSession?.winning_score ?? 21;
+        const deuceEnabled = currentSession?.enable_deuce ?? true;
+        const rules = { winningScore, deuceEnabled };
+
+        const scoreA = match.team_a_score;
+        const scoreB = match.team_b_score;
+
+        const servingTeam: 'A' | 'B' = match.serving_team || (scoreA >= scoreB ? 'A' : 'B');
+        const serviceSide = getServiceSide(servingTeam === 'A' ? scoreA : scoreB);
+
+        return {
+          matchId: match.id,
+          scoreA,
+          scoreB,
+          teamALabel: buildTeamLabel(match.team_a_p1, match.team_a_p2),
+          teamBLabel: buildTeamLabel(match.team_b_p1, match.team_b_p2),
+          servingTeam,
+          serviceSide,
+          isGamePointA: isGamePoint(scoreA, scoreB, rules),
+          isGamePointB: isGamePoint(scoreB, scoreA, rules),
+          timestamp: Date.now(),
+          courtNumber: match.court_number,
+        } as ScoreUpdate & { courtNumber: number };
+      },
     });
-  }, [updateScore, buildTeamLabel, buildScoreUpdate]);
+  }, [updateScore, buildTeamLabel]);
 
   // ────── Broadcast เมื่อคะแนนเปลี่ยน ──────
 
@@ -215,7 +259,12 @@ export const useLanServer = () => {
   const getMatchUrl = useCallback((matchId: string): string | null => {
     const base = getServerUrl();
     if (!base) return null;
-    return `${base}/scoreboard?id=${matchId}`;
+    // ใช้ format มาตรฐานที่สุดที่เบราว์เซอร์และ server library เข้าใจตรงกัน
+    return `${base}/?id=${matchId}`;
+  }, []);
+
+  const getBaseUrl = useCallback((): string | null => {
+    return getServerUrl();
   }, []);
 
   return {
@@ -224,5 +273,6 @@ export const useLanServer = () => {
     stopServer,
     broadcastMatch,
     getMatchUrl,
+    getBaseUrl,
   };
 };

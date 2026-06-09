@@ -73,11 +73,14 @@ export const initDatabase = async () => {
           team_b_p2 TEXT,
           team_a_score INTEGER DEFAULT 0,
           team_b_score INTEGER DEFAULT 0,
+          serving_team TEXT DEFAULT 'A',
           status TEXT DEFAULT 'active',
           created_at TEXT NOT NULL,
           FOREIGN KEY (session_id) REFERENCES sessions (id) ON DELETE CASCADE
         );
       `);
+
+      try { await db.execAsync("ALTER TABLE matches ADD COLUMN serving_team TEXT DEFAULT 'A';"); } catch (e) {}
 
       dbInstance = db;
       return db;

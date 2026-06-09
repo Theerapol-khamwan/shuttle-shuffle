@@ -20,7 +20,8 @@ import { useKeepAwake } from 'expo-keep-awake';
 import { useLanServer } from '../../src/hooks/useLanServer';
 
 export default function Scoreboard() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id: rawId } = useLocalSearchParams<{ id: string }>();
+  const id = Array.isArray(rawId) ? rawId[0] : (rawId || '');
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { activeMatches, players, currentSession, updateScore, completeMatch } = usePlayerStore();
@@ -33,7 +34,7 @@ export default function Scoreboard() {
   
   const [scoreA, setScoreA] = useState(match?.team_a_score || 0);
   const [scoreB, setScoreB] = useState(match?.team_b_score || 0);
-  const [servingTeam, setServingTeam] = useState<'A' | 'B'>('A');
+  const [servingTeam, setServingTeam] = useState<'A' | 'B'>(match?.serving_team || 'A');
   const [showControls, setShowControls] = useState(false);
   const [isSwapped, setIsSwapped] = useState(false);
   const [showShare, setShowShare] = useState(false);
@@ -50,8 +51,9 @@ export default function Scoreboard() {
     if (match) {
       setScoreA(match.team_a_score);
       setScoreB(match.team_b_score);
+      setServingTeam(match.serving_team);
     }
-  }, [match?.id]);
+  }, [match?.id, match?.serving_team]);
 
   if (!match) {
     return (
@@ -74,18 +76,25 @@ export default function Scoreboard() {
   const handleScoreChange = useCallback(async (team: 'A' | 'B', delta: number) => {
     let newA = scoreA;
     let newB = scoreB;
+    let newServing = servingTeam;
 
     if (team === 'A') {
       newA = Math.max(0, scoreA + delta);
       setScoreA(newA);
-      if (delta > 0) setServingTeam('A');
+      if (delta > 0) {
+        newServing = 'A';
+        setServingTeam('A');
+      }
     } else {
       newB = Math.max(0, scoreB + delta);
       setScoreB(newB);
-      if (delta > 0) setServingTeam('B');
+      if (delta > 0) {
+        newServing = 'B';
+        setServingTeam('B');
+      }
     }
 
-    await updateScore(id, newA, newB);
+    await updateScore(id, newA, newB, newServing);
 
     // Broadcast ไปยัง web clients ถ้า server กำลังทำงาน
     if (serverRunning) {
@@ -100,7 +109,7 @@ export default function Scoreboard() {
         [{ text: 'ตกลง' }]
       );
     }
-  }, [scoreA, scoreB, id, updateScore, serverRunning, broadcastMatch, rules]);
+  }, [scoreA, scoreB, servingTeam, id, updateScore, serverRunning, broadcastMatch, rules]);
 
   const handleFinishMatch = () => {
     Alert.alert(
@@ -109,8 +118,20 @@ export default function Scoreboard() {
       [
         { text: 'ยกเลิก', style: 'cancel' },
         { text: 'จบแมตช์', style: 'default', onPress: async () => {
-          await completeMatch(id, scoreA, scoreB);
+          // บันทึกค่าไว้ก่อนนำไปใช้ใน async task
+          const currentA = scoreA;
+          const currentB = scoreB;
+          const currentServing = servingTeam;
+          
+          // นำทางออกทันทีเพื่อเลี่ยงปัญหา component re-render แล้วหา match ไม่เจอจนแอปเด้ง
           router.replace('/dashboard');
+          
+          // ทำงานเบื้องหลัง
+          try {
+            await completeMatch(id, currentA, currentB, currentServing);
+          } catch (error) {
+            console.error('Failed to complete match:', error);
+          }
         }}
       ]
     );
@@ -191,8 +212,11 @@ export default function Scoreboard() {
               <NeoButton
                 variant="ghost"
                 title="🔄 สลับผู้เสิร์ฟ"
-                onPress={() => {
-                  setServingTeam(servingTeam === 'A' ? 'B' : 'A');
+                onPress={async () => {
+                  const nextServing = servingTeam === 'A' ? 'B' : 'A';
+                  setServingTeam(nextServing);
+                  await updateScore(id, scoreA, scoreB, nextServing);
+                  if (serverRunning) broadcastMatch(id);
                   setShowControls(false);
                 }}
                 fullWidth

@@ -55,12 +55,22 @@ const scoreCache = new Map<string, ScoreUpdate & { courtNumber?: number; updated
 
 const DEFAULT_PORT = 8080;
 let isRunning = false;
+let routesRegistered = false; // ป้องกันการลงทะเบียน route ซ้ำ
 let serverUrl: string | null = null;
 let deviceIp: string | null = null;
 
 let onScoreAction: ScoreActionHandler | null = null;
 let getMatches: GetMatchesHandler | null = null;
 let getMatchScore: GetMatchScoreHandler | null = null;
+
+// ────────────────────────────────────────────────────────────
+// Helpers
+// ────────────────────────────────────────────────────────────
+
+const extractPathSegment = (path: string, index: number): string => {
+  const segments = path.split('/').filter(s => s.length > 0);
+  return segments[index] || '';
+};
 
 // ────────────────────────────────────────────────────────────
 // Server Control
@@ -163,6 +173,9 @@ export const broadcastScoreUpdate = (update: ScoreUpdate & { courtNumber?: numbe
   });
 };
 
+import * as FileSystem from 'expo-file-system';
+import { Asset } from 'expo-asset';
+
 // ────────────────────────────────────────────────────────────
 // Route Registration
 // ────────────────────────────────────────────────────────────
@@ -175,102 +188,184 @@ const CORS_HEADERS = {
 };
 
 const registerAllRoutes = () => {
-  if (!HttpServer) return;
-  // ── GET / → Match List ──────────────────────────────────
-  HttpServer.route('/', 'GET', async (_req: RequestEvent) => {
-    const matches = getMatches ? getMatches() : [];
-    return {
-      statusCode: 200,
-      contentType: 'text/html; charset=utf-8',
-      headers: { 'Cache-Control': 'no-cache' },
-      body: getMatchListPageHTML(matches),
-    };
-  });
+  if (!HttpServer || routesRegistered) return;
+  routesRegistered = true;
 
-  // ── GET /scoreboard/:matchId ─────────────────────────────
-  // expo-http-server ไม่รองรับ wildcard path, ต้องใช้ glob
-  // จึงใช้ trick: register generic path ด้วย pattern
-  // Note: library อาจต้องการ exact path — ดังนั้น register ด้วย prefix แทน
-  HttpServer.route('/scoreboard', 'GET', async (req: RequestEvent) => {
-    // ดึง matchId จาก query param หรือ path
-    const params = req.paramsJson ? JSON.parse(req.paramsJson) : {};
-    const matchId = params.id || extractPathSegment(req.path, 2);
-    if (!matchId) {
-      return { statusCode: 400, contentType: 'text/plain', body: 'matchId required' };
-    }
-    return {
-      statusCode: 200,
-      contentType: 'text/html; charset=utf-8',
-      headers: { 'Cache-Control': 'no-cache' },
-      body: getScoreboardPageHTML(matchId),
-    };
-  });
+  // ── Serve Assets ──
+  HttpServer.route('/assets/exchange.png', 'GET', async () => {
+    try {
+      // โหลดไฟล์จาก local assets
+      const asset = Asset.fromModule(require('../../assets/exchange.png'));
+      await asset.downloadAsync();
+      const base64 = await FileSystem.readAsStringAsync(asset.localUri!, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
-  // ── GET /api/matches ─────────────────────────────────────
-  HttpServer.route('/api/matches', 'GET', async (_req: RequestEvent) => {
-    const matches = getMatches ? getMatches() : [];
-    return {
-      statusCode: 200,
-      contentType: 'application/json; charset=utf-8',
-      headers: CORS_HEADERS,
-      body: JSON.stringify(matches),
-    };
-  });
-
-  // ── GET /api/poll?matchId=X&since=Y ──────────────────────
-  // Polling endpoint: client polls ทุก ~800ms
-  // Returns latest score if newer than `since` timestamp
-  HttpServer.route('/api/poll', 'GET', async (req: RequestEvent) => {
-    const params = req.paramsJson ? JSON.parse(req.paramsJson) : {};
-    const matchId = params.matchId as string;
-    const since = parseInt(params.since ?? '0', 10) || 0;
-
-    if (!matchId) {
       return {
-        statusCode: 400,
+        statusCode: 200,
+        contentType: 'image/png',
+        headers: CORS_HEADERS,
+        body: base64,
+        isBase64: true, // บอก library ว่าเป็น binary
+      };
+    } catch (err) {
+      return { statusCode: 404, body: 'Not Found' };
+    }
+  });
+
+  const handleScoreboardRequest = async (req: RequestEvent) => {
+    let matchId = '';
+    const fullUrl = (req.url || '') + (req.path || '');
+    
+    // 1. พยายามแกะจาก Query Parameter (?id=...)
+    const idMatch = fullUrl.match(/[?&]id=([^&?#]+)/);
+    if (idMatch) {
+      matchId = idMatch[1];
+    }
+    
+    // 2. ถ้ายังไม่มี ให้ลองแกะจาก Path Segment (กรณี /UUID หรือ /scoreboard/UUID)
+    if (!matchId) {
+      const segments = (req.path || '').split('?')[0].split('/').filter(s => s.length > 0);
+      // หา segment ที่ดูเหมือน UUID (ยาว > 20 ตัวอักษร และไม่ใช่คำว่า scoreboard)
+      const possibleId = segments.find(s => s.length > 20 && s !== 'scoreboard');
+      if (possibleId) {
+        matchId = possibleId;
+      }
+    }
+
+    console.log(`[LanServer] Request Scoreboard: path=${req.path}, extractedId=${matchId}`);
+
+    // ถ้าไม่มี ID ให้ลองหาแมตช์ที่กำลังเล่นอยู่จาก Store อัตโนมัติ (UX: เข้า / เฉยๆ ก็เห็นแมตช์ที่รันอยู่)
+    if (!matchId) {
+      const matches = getMatches ? getMatches() : [];
+      if (matches.length > 0) {
+        matchId = matches[0].id;
+      }
+    }
+
+    // ถ้ายังไม่มีแมตช์จริงๆ ให้ไปหน้า List
+    if (!matchId) {
+      const matches = getMatches ? getMatches() : [];
+      return {
+        statusCode: 200,
+        contentType: 'text/html; charset=utf-8',
+        headers: { 
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        body: getMatchListPageHTML(matches),
+      };
+    }
+
+    const initialScore = getMatchScore ? getMatchScore(matchId) : null;
+    return {
+      statusCode: 200,
+      contentType: 'text/html; charset=utf-8',
+      headers: { 
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
+      body: getScoreboardPageHTML(matchId, initialScore),
+    };
+  };
+
+  // ลงทะเบียนเส้นทางหลัก
+  HttpServer.route('/', 'GET', handleScoreboardRequest);
+  HttpServer.route('/scoreboard', 'GET', handleScoreboardRequest);
+
+  // ── API: Poll (ใช้ POST เพื่อเลี่ยงปัญหา query string ใน library) ──
+  HttpServer.route('/api/poll', 'POST', async (req: RequestEvent) => {
+    try {
+      let body: any = {};
+      if (typeof req.body === 'string' && req.body.trim().length > 0) {
+        try {
+          body = JSON.parse(req.body);
+        } catch (e) {
+          console.warn('[LanServer] Invalid JSON body:', req.body);
+        }
+      } else if (req.body && typeof req.body === 'object') {
+        body = req.body;
+      }
+
+      const { matchId, since } = body;
+      const sinceNum = Number(since || 0);
+
+      if (!matchId) {
+        return {
+          statusCode: 400,
+          contentType: 'application/json',
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ error: 'matchId required' }),
+        };
+      }
+
+      let cached = scoreCache.get(matchId);
+      const liveScore = getMatchScore ? getMatchScore(matchId) : null;
+
+      // Self-healing: ถ้าข้อมูลใน cache ไม่ตรงกับ liveScore (store) -> ถือว่ามี update
+      if (liveScore && (!cached || 
+          cached.scoreA !== liveScore.scoreA || 
+          cached.scoreB !== liveScore.scoreB || 
+          cached.servingTeam !== liveScore.servingTeam)) {
+        
+        // อัพเดท cache ทันทีเพื่อให้ poll ถัดไปเสถียร
+        broadcastScoreUpdate(liveScore);
+        cached = scoreCache.get(matchId);
+      }
+      
+      // ถ้ามีข้อมูลใน cache และใหม่กว่าที่ client มี -> ส่งกลับทันที
+      if (cached && cached.updatedAt > sinceNum) {
+        return {
+          statusCode: 200,
+          contentType: 'application/json; charset=utf-8',
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ ...cached, hasUpdate: true }),
+        };
+      }
+
+      // ถ้าไม่พบแมตช์ที่กำลังเล่นอยู่ (เช่น จบแมตช์แล้ว) ให้แจ้ง client
+      if (!liveScore) {
+        return {
+          statusCode: 200,
+          contentType: 'application/json; charset=utf-8',
+          headers: CORS_HEADERS,
+          body: JSON.stringify({ 
+            matchId,
+            status: 'completed',
+            hasUpdate: true 
+          }),
+        };
+      }
+
+      // ถ้าไม่มี update ให้ส่งสถานะ hasUpdate: false
+      // สำคัญ: ต้องส่ง updatedAt เป็นค่าเดิม (since) เพื่อไม่ให้ client ข้าม update ที่อาจเกิดขึ้นระหว่างรอยต่อ
+      return {
+        statusCode: 200,
+        contentType: 'application/json; charset=utf-8',
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ 
+          ...liveScore, 
+          updatedAt: sinceNum, 
+          hasUpdate: false 
+        }),
+      };
+    } catch (err) {
+      console.error('[LanServer] /api/poll error:', err);
+      return { 
+        statusCode: 500, 
         contentType: 'application/json',
         headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'matchId required' }),
+        body: JSON.stringify({ error: 'Server error' }) 
       };
     }
-
-    const cached = scoreCache.get(matchId);
-    const hasUpdate = cached && cached.updatedAt > since;
-
-    if (hasUpdate) {
-      return {
-        statusCode: 200,
-        contentType: 'application/json; charset=utf-8',
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ ...cached, hasUpdate: true }),
-      };
-    }
-
-    // ไม่มี update ใหม่ — ลองดึงจาก handler
-    const liveScore = getMatchScore ? getMatchScore(matchId) : null;
-    if (liveScore) {
-      const result = { ...liveScore, updatedAt: since, hasUpdate: false };
-      return {
-        statusCode: 200,
-        contentType: 'application/json; charset=utf-8',
-        headers: CORS_HEADERS,
-        body: JSON.stringify(result),
-      };
-    }
-
-    return {
-      statusCode: 200,
-      contentType: 'application/json',
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ hasUpdate: false }),
-    };
   });
 
   // ── POST /api/score ──────────────────────────────────────
-  // Web กดแต้ม → ส่งกลับมาที่นี่
   HttpServer.route('/api/score', 'POST', async (req: RequestEvent) => {
     try {
-      const body = req.body ? JSON.parse(req.body) : {};
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
       const { matchId, team, delta } = body;
 
       if (!matchId || !team || typeof delta !== 'number' || !['A', 'B'].includes(team)) {
@@ -302,34 +397,27 @@ const registerAllRoutes = () => {
     }
   });
 
+  // ── GET /api/matches (เพื่อความเข้ากันได้ย้อนหลัง) ──
+  HttpServer.route('/api/matches', 'GET', async () => {
+    const matches = getMatches ? getMatches() : [];
+    return {
+      statusCode: 200,
+      contentType: 'application/json',
+      headers: CORS_HEADERS,
+      body: JSON.stringify(matches),
+    };
+  });
+
   // ── OPTIONS (CORS preflight) ─────────────────────────────
-  HttpServer.route('/api/poll', 'OPTIONS', async (_req: RequestEvent) => ({
+  HttpServer.route('/api/poll', 'OPTIONS', async () => ({
     statusCode: 204,
     headers: CORS_HEADERS,
     body: '',
   }));
 
-  HttpServer.route('/api/score', 'OPTIONS', async (_req: RequestEvent) => ({
+  HttpServer.route('/api/score', 'OPTIONS', async () => ({
     statusCode: 204,
     headers: CORS_HEADERS,
     body: '',
   }));
-};
-
-// ────────────────────────────────────────────────────────────
-// Helpers
-// ────────────────────────────────────────────────────────────
-
-const extractPathSegment = (path: string, index: number): string => {
-  const parts = path.split('/').filter(Boolean);
-  return parts[index] ?? '';
-};
-
-export default {
-  startLanServer,
-  stopLanServer,
-  isServerRunning,
-  getServerUrl,
-  registerHandlers,
-  broadcastScoreUpdate,
 };

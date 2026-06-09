@@ -39,6 +39,7 @@ export interface Match {
   team_b_p2?: string;
   team_a_score: number;
   team_b_score: number;
+  serving_team: 'A' | 'B';
   status: 'active' | 'completed';
   created_at: string;
 }
@@ -48,6 +49,8 @@ interface PlayerStore {
   players: Player[];
   activeMatches: Match[];
   loading: boolean;
+  lanServerRunning: boolean;
+  lanServerUrl: string | null;
   
   startNewSession: () => Promise<void>;
   loadCurrentSession: () => Promise<void>;
@@ -60,8 +63,8 @@ interface PlayerStore {
   createMatch: (courtNumber?: number, mode?: MatchMode) => Promise<void>;
   loadActiveMatches: () => Promise<void>;
   bulkMatchGeneration: (rounds: number, mode?: MatchMode) => Promise<void>;
-  updateScore: (id: string, scoreA: number, scoreB: number) => Promise<void>;
-  completeMatch: (id: string, scoreA: number, scoreB: number) => Promise<void>;
+  updateScore: (id: string, scoreA: number, scoreB: number, servingTeam?: 'A' | 'B') => Promise<void>;
+  completeMatch: (id: string, scoreA: number, scoreB: number, servingTeam?: 'A' | 'B') => Promise<void>;
   endSession: () => Promise<void>;
 
   updateSessionCosts: (
@@ -75,6 +78,7 @@ interface PlayerStore {
   togglePlayerExclude: (id: string) => Promise<void>;
   togglePlayerPaid: (id: string) => Promise<void>;
   updatePlayerSkill: (id: string, skill_level: number) => Promise<void>;
+  setLanServerStatus: (running: boolean, url: string | null) => void;
 }
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
@@ -82,6 +86,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   players: [],
   activeMatches: [],
   loading: false,
+  lanServerRunning: false,
+  lanServerUrl: null,
 
   startNewSession: async () => {
     set({ loading: true });
@@ -378,38 +384,58 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     set({ activeMatches: results });
   },
 
-  updateScore: async (id: string, scoreA: number, scoreB: number) => {
+  updateScore: async (id: string, scoreA: number, scoreB: number, servingTeam?: 'A' | 'B') => {
     const db = await getDb();
-    await db.runAsync(
-      'UPDATE matches SET team_a_score = ?, team_b_score = ? WHERE id = ?',
-      [scoreA, scoreB, id]
-    );
+    if (servingTeam) {
+      await db.runAsync(
+        'UPDATE matches SET team_a_score = ?, team_b_score = ?, serving_team = ? WHERE id = ?',
+        [scoreA, scoreB, servingTeam, id]
+      );
+    } else {
+      await db.runAsync(
+        'UPDATE matches SET team_a_score = ?, team_b_score = ? WHERE id = ?',
+        [scoreA, scoreB, id]
+      );
+    }
     await get().loadActiveMatches();
   },
 
-  completeMatch: async (id: string, scoreA: number, scoreB: number) => {
+  completeMatch: async (id: string, scoreA: number, scoreB: number, servingTeam?: 'A' | 'B') => {
+    if (!id) return;
     const db = await getDb();
     
-    // First find the match to update last_played_at for the players
-    const match = await db.getFirstAsync<Match>('SELECT * FROM matches WHERE id = ?', [id]);
-    if (match) {
-      const now = new Date().toISOString();
-      const pids = [match.team_a_p1, match.team_a_p2, match.team_b_p1, match.team_b_p2].filter(Boolean) as string[];
-      for (const pid of pids) {
-        await db.runAsync('UPDATE players SET last_played_at = ? WHERE id = ?', [now, pid]);
+    try {
+      // First find the match to update last_played_at for the players
+      const match = await db.getFirstAsync<Match>('SELECT * FROM matches WHERE id = ?', [id]);
+      if (match) {
+        const now = new Date().toISOString();
+        const pids = [match.team_a_p1, match.team_a_p2, match.team_b_p1, match.team_b_p2].filter(Boolean) as string[];
+        for (const pid of pids) {
+          await db.runAsync('UPDATE players SET last_played_at = ? WHERE id = ?', [now, pid]);
+        }
       }
-    }
 
-    await db.runAsync(
-      "UPDATE matches SET team_a_score = ?, team_b_score = ?, status = 'completed' WHERE id = ?",
-      [scoreA, scoreB, id]
-    );
-    await get().loadActiveMatches();
-    
-    // Reload players to reflect last_played_at changes
-    const { currentSession } = get();
-    if (currentSession) {
-      await get().loadPlayers(currentSession.id);
+      if (servingTeam) {
+        await db.runAsync(
+          "UPDATE matches SET team_a_score = ?, team_b_score = ?, serving_team = ?, status = 'completed' WHERE id = ?",
+          [scoreA, scoreB, servingTeam, id]
+        );
+      } else {
+        await db.runAsync(
+          "UPDATE matches SET team_a_score = ?, team_b_score = ?, status = 'completed' WHERE id = ?",
+          [scoreA, scoreB, id]
+        );
+      }
+      await get().loadActiveMatches();
+      
+      // Reload players to reflect last_played_at changes
+      const { currentSession } = get();
+      if (currentSession) {
+        await get().loadPlayers(currentSession.id);
+      }
+    } catch (error) {
+      console.error('Error in completeMatch:', error);
+      throw error;
     }
   },
 
@@ -507,5 +533,9 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     );
 
     await get().loadPlayers(currentSession.id);
+  },
+
+  setLanServerStatus: (running: boolean, url: string | null) => {
+    set({ lanServerRunning: running, lanServerUrl: url });
   },
 }));

@@ -56,17 +56,17 @@ export default function ShareScoreboardModal({
     error,
     startServer,
     stopServer,
-    getMatchUrl,
+    getBaseUrl,
   } = useLanServer();
 
-  const matchUrl = running ? getMatchUrl(matchId) : null;
-  const { dataUri: qrDataUri, loading: qrLoading } = useQRCode(matchUrl);
+  const displayUrl = running ? getBaseUrl() : null;
+  const { dataUri: qrDataUri, loading: qrLoading } = useQRCode(displayUrl);
 
   const handleCopyUrl = useCallback(async () => {
-    if (!matchUrl) return;
-    await Clipboard.setStringAsync(matchUrl);
-    Alert.alert('คัดลอกแล้ว! ✅', matchUrl, [{ text: 'ตกลง' }]);
-  }, [matchUrl]);
+    if (!displayUrl) return;
+    await Clipboard.setStringAsync(displayUrl);
+    Alert.alert('คัดลอกแล้ว! ✅', displayUrl, [{ text: 'ตกลง' }]);
+  }, [displayUrl]);
 
   const handleToggleServer = useCallback(async () => {
     if (running) {
@@ -172,11 +172,11 @@ export default function ShareScoreboardModal({
                 )}
 
                 {/* URL display */}
-                {matchUrl && (
+                {displayUrl && (
                   <Pressable style={styles.urlBox} onPress={handleCopyUrl}>
                     <NeoText variant="label" style={styles.urlLabel}>URL</NeoText>
                     <NeoText variant="bodySm" style={styles.urlText} numberOfLines={1}>
-                      {matchUrl}
+                      {displayUrl}
                     </NeoText>
                     <NeoIcon name="content-copy" size={18} color={colors.primary} />
                   </Pressable>

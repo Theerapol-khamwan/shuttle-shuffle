@@ -4,8 +4,12 @@ import { initDatabase } from '../src/database/db';
 import ThemeProvider from '../src/ui/theme/ThemeProvider';
 import { colors } from '../src/ui/tokens/colors';
 import { FONT_HEADLINE } from '../src/ui/tokens/typography';
+import { useLanServer } from '../src/hooks/useLanServer';
 
 export default function RootLayout() {
+  // ลงทะเบียน LAN Server handlers ไว้ที่ระดับสูงสุดเพื่อให้พร้อมรับการเชื่อมต่อเสมอ
+  useLanServer();
+
   useEffect(() => {
     // อุ่นเครื่อง database ตั้งแต่เปิดแอป
     const setup = async () => {
